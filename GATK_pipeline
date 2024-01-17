@@ -26,7 +26,8 @@ bgzip morexv1.q30.geno.indel.PASS.vcf
 bgzip morexv1.q30.geno.snp.PASS.vcf
 tabix -C morexv1.q30.geno.snp.PASS.vcf.gz
 tabix -C morexv1.q30.geno.indel.PASS.vcf.gz
-bcftools concat morexv1.q30.geno.snp.PASS.vcf.gz morexv1.q30.geno.indel.PASS.vcf.gz -o compare-variant/morexv1.q30.variant.PASS.vcf.gz
+bcftools concat morexv1.q30.geno.snp.PASS.vcf.gz morexv1.q30.geno.indel.PASS.vcf.gz -o compare-variant/morexv1.q30.variant.PASS.vcf
+bgzip morexv1.q30.variant.PASS.vcf
 tabix -C morexv1.q30.variant.PASS.vcf.gz
 
 ##Tassel input morexv1.q30.variant.PASS.vcf.gz, output morexv1.q30.variant.PASS-noinfo.vcf
