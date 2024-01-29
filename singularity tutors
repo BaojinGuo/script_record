@@ -1,0 +1,11 @@
+
+
+module load singularity
+Terminal 1. Setting ownership and permission for the Singularity cache directory
+mkdir -p /software/projects/pawsey0399/bguo1/.singularity
+chown -hR $USER:$PAWSEY_PROJECT /software/projects/pawsey0399/bguo1/.singularity
+find /software/projects/pawsey0399/bguo1/.singularity -type d -exec chmod g+s {} \;
+
+
+singularity pull docker://dmolik/hifiasm
+
