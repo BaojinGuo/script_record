@@ -37,7 +37,7 @@ head(data)
 diff<-subset(data,data$V10 != data$V11)
 head(diff)
 write.table(diff[,1:2],"diff.txt",sep = "\t",quote=FALSE,row.names = FALSE)
-##subset the different variants between parents
+##subset the different variants between parents, remember to modify the chromosome row due to the abbrevation of Tassel output
 vcftools --gzvcf morexv1.q30.variant.PASS.vcf.gz --positions diff.txt --recode --recode-INFO-all --out morexv1.q30.variant.PASS-diff.vcf
 
 
