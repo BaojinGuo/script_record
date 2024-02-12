@@ -1,0 +1,124 @@
+###ggcomp
+##pre-prepare
+##window slide bed file
+bedtools makewindows -g $REF -w 100000 >morexv1_w100k.bed
+##split bam files based on reference chromosomes, maybe should use no q30 filtered files.
+samtools view -@ 20 -bh BASS_morexv1.markdup.q30.bam chr1H >BASS_morexv1_q30_1H.bam &
+samtools view -@ 20 -bh BASS_morexv1.markdup.q30.bam chr2H >BASS_morexv1_q30_2H.bam &
+samtools view -@ 20 -bh BASS_morexv1.markdup.q30.bam chr3H >BASS_morexv1_q30_3H.bam &
+samtools view -@ 20 -bh BASS_morexv1.markdup.q30.bam chr4H >BASS_morexv1_q30_4H.bam &
+samtools view -@ 20 -bh BASS_morexv1.markdup.q30.bam chr5H >BASS_morexv1_q30_5H.bam &
+samtools view -@ 20 -bh BASS_morexv1.markdup.q30.bam chr6H >BASS_morexv1_q30_6H.bam &
+samtools view -@ 20 -bh BASS_morexv1.markdup.q30.bam chr7H >BASS_morexv1_q30_7H.bam &
+samtools view -@ 20 -bh Flinders_morexv1.markdup.q30.bam chr7H >Flinders_morexv1_q30_7H.bam &
+samtools view -@ 20 -bh Flinders_morexv1.markdup.q30.bam chr6H >Flinders_morexv1_q30_6H.bam &
+samtools view -@ 20 -bh Flinders_morexv1.markdup.q30.bam chr5H >Flinders_morexv1_q30_5H.bam &
+samtools view -@ 20 -bh Flinders_morexv1.markdup.q30.bam chr4H >Flinders_morexv1_q30_4H.bam &
+samtools view -@ 20 -bh Flinders_morexv1.markdup.q30.bam chr3H >Flinders_morexv1_q30_3H.bam &
+samtools view -@ 20 -bh Flinders_morexv1.markdup.q30.bam chr2H >Flinders_morexv1_q30_2H.bam &
+samtools view -@ 20 -bh Flinders_morexv1.markdup.q30.bam chr1H >Flinders_morexv1_q30_1H.bam &
+##maybe we can have a loop, two samples in two filefolds
+for i in 1H 2H 3H 4H 5H 6H 7H
+do
+samtools view -@ 90 -bh BASS_morexv1.markdup.q30.bam chr$i >BASS_morexv1_q30_$i.bam
+done
+
+for i in 1H 2H 3H 4H 5H 6H 7H
+do
+samtools view -@ 90 -bh Flinders_morexv1.markdup.q30.bam chr$i >Flinders_morexv1_q30_$i.bam
+done
+##or two sample files in common file
+for sample in BASS Flinders; do for i in 1H 2H 3H 4H 5H 6H 7H; do 'samtools view -@ 90 -bh '$sample'_morexv1.markdup.q30.bam > '$sample'_morexv1_q30_'$i'.bam' ; done;  done
+
+
+##vcf files
+bcftools index BF.morexv1.variant.PASS.vcf.gz  ###index
+bcftools view -r chr1H BF.morexv1.variant.PASS.vcf.gz -O b -o ../ggcomp/BF_ggcomp/SNP_extractor/BF.chr1H.v1.bcf
+bcftools view -r chr2H BF.morexv1.variant.PASS.vcf.gz -O b -o ../ggcomp/BF_ggcomp/SNP_extractor/BF.chr2H.v1.bcf
+bcftools view -r chr3H BF.morexv1.variant.PASS.vcf.gz -O b -o ../ggcomp/BF_ggcomp/SNP_extractor/BF.chr3H.v1.bcf
+bcftools view -r chr4H BF.morexv1.variant.PASS.vcf.gz -O b -o ../ggcomp/BF_ggcomp/SNP_extractor/BF.chr4H.v1.bcf
+bcftools view -r chr5H BF.morexv1.variant.PASS.vcf.gz -O b -o ../ggcomp/BF_ggcomp/SNP_extractor/BF.chr5H.v1.bcf
+bcftools view -r chr6H BF.morexv1.variant.PASS.vcf.gz -O b -o ../ggcomp/BF_ggcomp/SNP_extractor/BF.chr6H.v1.bcf
+bcftools view -r chr7H BF.morexv1.variant.PASS.vcf.gz -O b -o ../ggcomp/BF_ggcomp/SNP_extractor/BF.chr7H.v1.bcf
+
+bcftools index BF.chr1H.v1.bcf ###index all bcf files
+
+#first setp, sample call CNV individually
+bash /scratch/pawsey0399/bguo1/software/ggComp/src/ggComp.sh CNV_detector --chr_lis 'chr1H chr2H chr3H chr4H chr5H chr6H chr7H' --single_CNV single_CNV.config  ##always have errors, so i run it based on chromosome list, so it works.
+##the content of single_CNV.config, the field separator must be tab '\t', not space ' '
+##chr1H   CNV_detector/morexv1_w100k.bed  CNV_detector/BASS/BASS_morexv1_q30_1H.bam       CNV_detector/BASS
+##chr1H   CNV_detector/morexv1_w100k.bed  CNV_detector/Flinders/Flinders_morexv1_q30_1H.bam       CNV_detector/Flinders
+##chr2H   CNV_detector/morexv1_w100k.bed  CNV_detector/BASS/BASS_morexv1_q30_2H.bam       CNV_detector/BASS
+##chr2H   CNV_detector/morexv1_w100k.bed  CNV_detector/Flinders/Flinders_morexv1_q30_2H.bam       CNV_detector/Flinders
+##chr3H   CNV_detector/morexv1_w100k.bed  CNV_detector/BASS/BASS_morexv1_q30_3H.bam       CNV_detector/BASS
+##chr3H   CNV_detector/morexv1_w100k.bed  CNV_detector/Flinders/Flinders_morexv1_q30_3H.bam       CNV_detector/Flinders
+##chr4H   CNV_detector/morexv1_w100k.bed  CNV_detector/BASS/BASS_morexv1_q30_4H.bam       CNV_detector/BASS
+##chr4H   CNV_detector/morexv1_w100k.bed  CNV_detector/Flinders/Flinders_morexv1_q30_4H.bam       CNV_detector/Flinders
+##chr5H   CNV_detector/morexv1_w100k.bed  CNV_detector/BASS/BASS_morexv1_q30_5H.bam       CNV_detector/BASS
+##chr5H   CNV_detector/morexv1_w100k.bed  CNV_detector/Flinders/Flinders_morexv1_q30_5H.bam       CNV_detector/Flinders
+##chr6H   CNV_detector/morexv1_w100k.bed  CNV_detector/BASS/BASS_morexv1_q30_6H.bam       CNV_detector/BASS
+##chr6H   CNV_detector/morexv1_w100k.bed  CNV_detector/Flinders/Flinders_morexv1_q30_6H.bam       CNV_detector/Flinders
+##chr7H   CNV_detector/morexv1_w100k.bed  CNV_detector/BASS/BASS_morexv1_q30_7H.bam       CNV_detector/BASS
+##chr7H   CNV_detector/morexv1_w100k.bed  CNV_detector/Flinders/Flinders_morexv1_q30_7H.bam       CNV_detector/Flinders
+##single_CNV.config lines 1-14/14 (END)
+##morexv1_w100k.bed in the window slide file, the first row is the chromosome name, the second is window slide file, the third is bam file individal which has been extracted by reads quality q30 (maybe no filter is good), the fouth is the direction of output filefold
+bash /scratch/pawsey0399/bguo1/software/ggComp/src/ggComp.sh CNV_detector --chr_lis chr1H --single_CNV single_CNV_chr1H
+
+
+#second step, pair compare, identify pairwise sample specific CNV regions and shared CNV regions
+bash /scratch/pawsey0399/bguo1/software/ggComp/src/ggComp.sh CNV_detector --chr_lis 'chr1H chr2H chr3H chr4H chr5H chr6H chr7H' --pair_CNV pair_CNV.config ##same as step one, it is always errors, only the first could run, so i divide chromosomes to run, it works again 
+##the content of pair_CNV.config
+##BASS    CNV_detector/BASS       Flinders        CNV_detector/Flinders   CNV_detector/BASS_Flinders
+##sample1_name sample1_directory sample2_name sample2_directory pair_dircetory
+##input file contains sample names, path of CNV file and path of output file directory
+bash /scratch/pawsey0399/bguo1/software/ggComp/src/ggComp.sh CNV_detector --chr_lis chr1H  --pair_CNV pair_CNV.config
+
+#third step,SNP_extractor
+bash /scratch/pawsey0399/bguo1/software/ggComp/src/ggComp.sh SNP_extractor --config SNP_extractor.config
+
+##SNP_extractor/BF.chr1H.v1.bcf   BASS,Flinders   SNP_extractor/chr1H.SNP_gt
+##SNP_extractor/BF.chr2H.v1.bcf   BASS,Flinders   SNP_extractor/chr2H.SNP_gt
+##SNP_extractor/BF.chr3H.v1.bcf   BASS,Flinders   SNP_extractor/chr3H.SNP_gt
+##SNP_extractor/BF.chr4H.v1.bcf   BASS,Flinders   SNP_extractor/chr4H.SNP_gt
+##SNP_extractor/BF.chr5H.v1.bcf   BASS,Flinders   SNP_extractor/chr5H.SNP_gt
+##SNP_extractor/BF.chr6H.v1.bcf   BASS,Flinders   SNP_extractor/chr6H.SNP_gt
+##SNP_extractor/BF.chr7H.v1.bcf   BASS,Flinders   SNP_extractor/chr7H.SNP_gt
+##SNP_extractor.config lines 1-7/7 (END),path of vcf files, sample ID list in vcf for extracting(separated by ','), path of output file
+
+#fourth step, DSR_counter
+bash /scratch/pawsey0399/bguo1/software/ggComp/src/ggComp.sh DSR_counter --config DSR_counter.config --bin_size 100000
+
+
+##SNP_extractor/chr1H.SNP_gt      DSR_counter/chr1H.DSR   558535432
+##SNP_extractor/chr2H.SNP_gt      DSR_counter/chr2H.DSR   768075024
+##SNP_extractor/chr3H.SNP_gt      DSR_counter/chr3H.DSR   699711114
+##SNP_extractor/chr4H.SNP_gt      DSR_counter/chr4H.DSR   647060158
+##SNP_extractor/chr5H.SNP_gt      DSR_counter/chr5H.DSR   670030160
+##SNP_extractor/chr6H.SNP_gt      DSR_counter/chr6H.DSR   583380513
+##SNP_extractor/chr7H.SNP_gt      DSR_counter/chr7H.DSR   657224000
+##DSR_counter.config lines 1-7/7 (END),path of files contain SNP inforamtion; path of output files; end position of chromosomes
+
+
+##fifth step, SGR_PHR_definer
+bash /scratch/pawsey0399/bguo1/software/ggComp/src/ggComp.sh SGR_PHR_definer --plus_CNV SGR_PHR_plus_CNV.config --LEVEL 10
+##DSR_counter/chr1H.DSR   CNV_detector/BASS_Flinders/chr1H.BASStoFlindersall_CNV  SGR_PHR_definer/chr1H_combineCNV.level
+##DSR_counter/chr2H.DSR   CNV_detector/BASS_Flinders/chr2H.BASStoFlindersall_CNV  SGR_PHR_definer/chr2H_combineCNV.level
+##DSR_counter/chr3H.DSR   CNV_detector/BASS_Flinders/chr3H.BASStoFlindersall_CNV  SGR_PHR_definer/chr3H_combineCNV.level
+##DSR_counter/chr4H.DSR   CNV_detector/BASS_Flinders/chr4H.BASStoFlindersall_CNV  SGR_PHR_definer/chr4H_combineCNV.level
+##DSR_counter/chr5H.DSR   CNV_detector/BASS_Flinders/chr5H.BASStoFlindersall_CNV  SGR_PHR_definer/chr5H_combineCNV.level
+##DSR_counter/chr6H.DSR   CNV_detector/BASS_Flinders/chr6H.BASStoFlindersall_CNV  SGR_PHR_definer/chr6H_combineCNV.level
+##DSR_counter/chr7H.DSR   CNV_detector/BASS_Flinders/chr7H.BASStoFlindersall_CNV  SGR_PHR_definer/chr7H_combineCNV.level
+##SGR_PHR_plus_CNV.config lines 1-7/7 (END) path of files contain DSR information, path of CNV file and path of output files.
+
+bash /scratch/pawsey0399/bguo1/software/ggComp/src/ggComp.sh SGR_PHR_definer --no_CNV SGR_PHR_noCNV.config --LEVEL 10
+##DSR_counter/chr1H.DSR   SGR_PHR_definer/chr1H_noCNV.level
+##DSR_counter/chr2H.DSR   SGR_PHR_definer/chr2H_noCNV.level
+##DSR_counter/chr3H.DSR   SGR_PHR_definer/chr3H_noCNV.level
+##DSR_counter/chr4H.DSR   SGR_PHR_definer/chr4H_noCNV.level
+##DSR_counter/chr5H.DSR   SGR_PHR_definer/chr5H_noCNV.level
+##DSR_counter/chr6H.DSR   SGR_PHR_definer/chr6H_noCNV.level
+##DSR_counter/chr7H.DSR   SGR_PHR_definer/chr7H_noCNV.level
+##SGR_PHR_noCNV.config lines 1-7/7 (END) path of files contain DSR information and path of output files.
+
+
+
