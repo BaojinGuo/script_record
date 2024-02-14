@@ -99,7 +99,7 @@ bash /scratch/pawsey0399/bguo1/software/ggComp/src/ggComp.sh DSR_counter --confi
 ##DSR_counter.config lines 1-7/7 (END),path of files contain SNP inforamtion; path of output files; end position of chromosomes
 
 
-##fifth step, SGR_PHR_definer
+##fifth step, SGR_PHR_definer,,the --LEVEL : due to the nature snp variation rate is 10e-5 to 10e-8, the region including 10 variations between 1Mbp should be PHR.
 bash /scratch/pawsey0399/bguo1/software/ggComp/src/ggComp.sh SGR_PHR_definer --plus_CNV SGR_PHR_plus_CNV.config --LEVEL 10
 ##DSR_counter/chr1H.DSR   CNV_detector/BASS_Flinders/chr1H.BASStoFlindersall_CNV  SGR_PHR_definer/chr1H_combineCNV.level
 ##DSR_counter/chr2H.DSR   CNV_detector/BASS_Flinders/chr2H.BASStoFlindersall_CNV  SGR_PHR_definer/chr2H_combineCNV.level
