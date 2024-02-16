@@ -8,4 +8,8 @@ find /software/projects/pawsey0399/bguo1/.singularity -type d -exec chmod g+s {}
 
 
 singularity pull docker://dmolik/hifiasm
+singularity pull docker://dromero93/allmaps
+
+singularity shell allmaps_lastest.sif
+
 
