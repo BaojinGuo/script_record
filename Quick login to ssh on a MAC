@@ -1,0 +1,25 @@
+cd /Users/baojinguo/.ssh
+ssh-keygen -t rsa
+
+vim ~/.ssh/config
+##config file
+Host setonix
+HostName setonix.pawsey.org.au
+User bguo1
+Port 22
+IdentityFile /Users/baojinguo/.ssh/id_rsa
+
+Host nimbus
+HostName 146.118.67.249
+User ubuntu
+Port 22
+IdentityFile /Users/baojinguo/shell_login/slnimbus.pem
+
+
+Host Bret
+HostName 134.115.238.232
+User yongjia
+Port 22
+IdentityFile /Users/baojinguo/.ssh/id_rsa
+
+source ~/.ssh/config
