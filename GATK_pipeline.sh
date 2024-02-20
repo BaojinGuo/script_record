@@ -26,11 +26,13 @@ bgzip morexv1.q30.geno.indel.PASS.vcf
 bgzip morexv1.q30.geno.snp.PASS.vcf
 tabix -C morexv1.q30.geno.snp.PASS.vcf.gz
 tabix -C morexv1.q30.geno.indel.PASS.vcf.gz
-bcftools concat morexv1.q30.geno.snp.PASS.vcf.gz morexv1.q30.geno.indel.PASS.vcf.gz -o compare-variant/morexv1.q30.variant.PASS.vcf
-bgzip morexv1.q30.variant.PASS.vcf
-tabix -C morexv1.q30.variant.PASS.vcf.gz
+bcftools concat -a -O z morexv1.q30.geno.snp.PASS.vcf.gz morexv1.q30.geno.indel.PASS.vcf.gz -o compare-variant/morexv1.q30.variant.PASS.vcf.gz
+##bgzip morexv1.q30.variant.PASS.vcf
+##tabix -C morexv1.q30.variant.PASS.vcf.gz
 
 ##Tassel input morexv1.q30.variant.PASS.vcf.gz, output morexv1.q30.variant.PASS-noinfo.vcf
+run_pipeline.pl -Xmx50g -fork1 -vcf BF.morexv3.q30.variants.PASS.vcf.gz -sortPositions -export BF.morexv3.q30.variants.PASS.noinf.vcf -exportType VCF -exportIncludeAnno false -exportIncludeDepth false -runfork1
+
 ###R program, print position.txt
 data<-read.table("morexv1.q30.variant.PASS-noinfo.vcf",header = F)
 head(data)
