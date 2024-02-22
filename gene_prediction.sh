@@ -116,6 +116,41 @@ done
 
 
 ####Geneome annotations 
+##cd-hit 因尚未有转录组数据，我这里先找了四个同源物种的蛋白序列（豌豆，苜蓿，三叶草，大豆）合并为一个文件，用该软件去冗余
+conda install -c bioconda cd-hit
+#蛋白使用以下参数
+cd-hit -i seq.fasta -o seq-out.fasta -c 0.4 -T 4 -n 2
+#-i 输入文件，fasta格式
+#-o 输出文件
+#-c 相似性,0.4代表相似度大于40%的为一类
+#-n 两两序列进行序列比对时选择的 word size
+#-T 使用的线程数
+#Choose of word size:
+#-n 5 for thresholds 0.7 ~ 1.0
+#-n 4 for thresholds 0.6 ~ 0.7
+#-n 3 for thresholds 0.5 ~ 0.6
+#-n 2 for thresholds 0.4 ~ 0.5
+
+#核苷酸用以下参数
+#cd-hit -i seq.fasta -o seq-out.fasta -c 0.8 -T 4 -n 4
+#-i 输入文件，fasta格式
+#-o 输出文件
+#-c 相似性,0.8代表相似度大于80%的为一类
+#-T 使用的线程数
+#-n 两两序列进行序列比对时选择的 word size
+#Choose of word size:
+#-n 10, 11 for thresholds 0.95 ~ 1.0
+#-n 8,9 for thresholds 0.90 ~ 0.95
+#-n 7 for thresholds 0.88 ~ 0.9
+#-n 6 for thresholds 0.85 ~ 0.88
+#-n 5 for thresholds 0.80 ~ 0.85
+#-n 4 for thresholds 0.75 ~ 0.8
+
+
+
+
+
+
 ###AUGUSTUS
 ##
 
