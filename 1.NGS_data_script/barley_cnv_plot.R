@@ -1,5 +1,6 @@
 #!/usr/bin/Rscript
 ##Rscript barley_cnv_plot.R --cnv_data $file1 --chromosome_lengths $file2
+
 # Load necessary libraries
 library(ggplot2)
 
