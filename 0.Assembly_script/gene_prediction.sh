@@ -53,7 +53,7 @@ exonerate
 ##git clone https://github.com/EVidenceModeler/EVidenceModeler.git
 
 
-##Install RepeatMsker v4.1.6
+###Install RepeatMsker v4.1.6
 ##in setonix, using singularity container, just singularity pull docker://pegi3s/repeat_masker
 ##conda install -c bioconda trf
 ##conda install -c bioconda hmmer==3.2.1
@@ -71,7 +71,7 @@ cd RepeatMasker-4.1.6
 ./configure
 ##根据提示安装,安装成功后加入环境
 ##export PATH="/data/baojin/software/RepeatMasker:$PATH"
-RepeatMasker S1_hifi.asm.bp.p_ctg.fa -species "Serradella" -e hmmer -xsmall -s -gff -pa 15
+#RepeatMasker S1_hifi.asm.bp.p_ctg.fa -species "Serradella" -e hmmer -xsmall -s -gff -pa 15  #到这里，发现没有这个物种，所以就要重头预测，应用RepeatModeler
 #-e search engine,rmblast hmmer crossmatch abblast, anyone of them
 #-species species name, must be in the NCBI Species classification database, Latin scientific names are recommended
 #-s  Slow search; 0-5% more sensitive, 2-3 times slower than default
@@ -79,6 +79,77 @@ RepeatMasker S1_hifi.asm.bp.p_ctg.fa -species "Serradella" -e hmmer -xsmall -s -
 #-nolow Does not mask low_complexity DNA or simple repeats
 #-xsmall Returns repetitive regions in lowercase (rest capitals) rather than masked-----sm, soft-mask
 #-pa(rallel) [number] The number of sequence batch jobs [50kb minimum] to run in parallel. RepeatMasker will fork off this number of parallel jobs, each running the search engine specified. For each search engine invocation ( where applicable ) a fixed the number of cores/threads
+
+
+###Install RepeatModeler 2.0.5 (https://github.com/Dfam-consortium/RepeatModeler)
+##RECON 1.0.8
+conda install -c bioconda -c conda-forge RECON
+##CD-HIT 4.8.1
+conda install -c bioconda cd-hit
+##RepeatScout
+wget http://www.repeatmasker.org/RepeatScout-1.0.6.tar.gz
+tar -xzvf RepeatScout-1.0.6.tar.gz 
+cd RepeatScout-1.0.6/
+make
+##LtrHarvest---The LtrHarvest program is part of the GenomeTools suite
+wget https://genometools.org/pub/binary_distributions/gt-1.6.2-Linux_x86_64-64bit-complete.tar.gz
+tar -xzvf gt-1.6.2-Linux_x86_64-64bit-complete.tar.gz gt-1.6.2-Linux_x86_64-64bit-complete
+##Ltr_retriever
+conda install -c bioconda -c conda-forge ltr_retriever
+git clone https://github.com/oushujun/LTR_retriever.git
+##MAFFT - A multiple sequence alignment program.
+wget https://mafft.cbrc.jp/alignment/software/mafft-7.505-with-extensions-src.tgz 
+tar -xzvf mafft-7.505-with-extensions-src.tgz
+vim /data/baojin/software/mafft-7.505-with-extensions/core/Makefile 
+modify the first line 'PREFIX = /usr/local' to 'PREFIX = /data/baojin/software/mafft-7.505-with-extensions'  ##install path modify
+cd /data/baojin/software/mafft-7.505-with-extensions/core/
+make clean
+make
+make install
+
+##NINJA
+wget https://github.com/TravisWheelerLab/NINJA/archive/refs/tags/0.98-cluster_only.tar.gz
+tar -zxvf 0.98-cluster_only.tar.gz
+cd /data/baojin/software/NINJA-0.98-cluster_only/NINJA
+make all
+cd ..
+cp -r NINJA/ /data/baojin/software
+
+##UCSC TwoBit Tools
+mkdir kent
+cd kent
+wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa
+wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/faToTwoBit
+wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/twoBitInfo
+chmod +x *
+
+###the last, install RepeatModeler2.0.5
+git clone https://github.com/Dfam-consortium/RepeatModeler.git
+cd RepeatModeler
+##install perl modle the server missing
+cpan File::Which
+cpan URI
+#cpan Devel::Size ###can not install
+#cpan LWP::UserAgent ###can not install, so i modified the configure file to delete the two dependence module, these two modules were useless.
+根据提示设置上述软件的路径即可
+
+If you use singularity containers, it will be easy, just using following command, this container including RepeatMasker, RepeatModeler, and coseg. 
+singularity pull docker://dfam/tetools
+
+####Run RepeatModeler
+##First build library
+mkdir db
+BuildDatabase --name db/Serradalle1 S1_hifi.asm.bp.p_ctg.fa
+BuildDatabase --name db/Serradalle2 S2_hifi.asm.bp.p_ctg.fa#--name is the name of library
+##Error: Unknown argument: "blastdb_version"; here i have this error, maybe due to the blast version, so i modify the BuilDatabase scipt to remove this augument, then it works! 
+
+##Second run RepeatModeler
+RepeatModeler -database -database db/Serradalle1 -threads 128 -LTRStruct
+RepeatModeler -database -database db/Serradalle2 -threads 128 -LTRStruct
+
+##Third run RepeatMasker
+RepeatMasker S1_hifi.asm.bp.p_ctg.fa -lib db/Serradalle1-families.fa -e hmmer -xsmall -s -gff -pa 128
+RepeatMasker S2_hifi.asm.bp.p_ctg.fa -lib db/Serradella2-families.fa -e hmmer -xsmall -s -gff -pa 128
 
 
 
@@ -130,7 +201,7 @@ done
 
 ####Geneome annotations 
 ##cd-hit 因尚未有转录组数据，我这里先找了四个同源物种的蛋白序列（豌豆，苜蓿，三叶草，大豆）合并为一个文件，用该软件去冗余,用于braker3的近缘蛋白输入文件
-conda install -c bioconda cd-hit
+
 #蛋白使用以下参数
 cd-hit -i seq.fasta -o seq-out.fasta -c 0.4 -T 4 -n 2
 #-i 输入文件，fasta格式
