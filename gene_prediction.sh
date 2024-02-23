@@ -63,10 +63,23 @@ exonerate
 ##tar -zxvf RepeatMasker-4.1.6.tar.gz
 
 ##wget https://www.biochen.org/public/software/RepBaseRepeatMaskerEdition-20181026.tar.gz 
+##wget https://www.dfam.org/releases/Dfam_3.8/families/FamDB/dfam38_full.0.h5.gz  
+###tar -xzvf dfam38_full.0.h5.gz  ###uncompress to the path $RepeatMasker/Libraries/famdb
 
+##conda install h5py
 cd RepeatMasker-4.1.6
 ./configure
-根据提示安装
+##根据提示安装,安装成功后加入环境
+##export PATH="/data/baojin/software/RepeatMasker:$PATH"
+RepeatMasker S1_hifi.asm.bp.p_ctg.fa -species "Serradella" -e hmmer -xsmall -s -gff -pa 15
+#-e search engine,rmblast hmmer crossmatch abblast, anyone of them
+#-species species name, must be in the NCBI Species classification database, Latin scientific names are recommended
+#-s  Slow search; 0-5% more sensitive, 2-3 times slower than default
+#-q  Quick search; 5-10% less sensitive, 2-5 times faster than default
+#-nolow Does not mask low_complexity DNA or simple repeats
+#-xsmall Returns repetitive regions in lowercase (rest capitals) rather than masked-----sm, soft-mask
+#-pa(rallel) [number] The number of sequence batch jobs [50kb minimum] to run in parallel. RepeatMasker will fork off this number of parallel jobs, each running the search engine specified. For each search engine invocation ( where applicable ) a fixed the number of cores/threads
+
 
 
 ##Files preparation; nimbus server
@@ -116,7 +129,7 @@ done
 
 
 ####Geneome annotations 
-##cd-hit 因尚未有转录组数据，我这里先找了四个同源物种的蛋白序列（豌豆，苜蓿，三叶草，大豆）合并为一个文件，用该软件去冗余
+##cd-hit 因尚未有转录组数据，我这里先找了四个同源物种的蛋白序列（豌豆，苜蓿，三叶草，大豆）合并为一个文件，用该软件去冗余,用于braker3的近缘蛋白输入文件
 conda install -c bioconda cd-hit
 #蛋白使用以下参数
 cd-hit -i seq.fasta -o seq-out.fasta -c 0.4 -T 4 -n 2
@@ -157,8 +170,9 @@ cd-hit -i seq.fasta -o seq-out.fasta -c 0.4 -T 4 -n 2
 perl /data/tools/miniconda3/pkgs/augustus-3.2.2-0/scripts/autoAugTrain.pl --genome=Pisum_sativum.Pisum_sativum_v1a.dna_rm.toplevel.fa --trainingset=Pisum_sativum.Pisum_sativum_v1a.58.chr.gff3 --species=Pea
 
 
+##Braker3
+braker.pl   Pipeline for predicting genes with GeneMark-EX and AUGUSTUS with RNA-Seq and/or proteins
 
-
-
-
+srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/braker3.sif braker.pl --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa --species=Ser1 --prot_seq /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa --useexisting --threads 128 \
+--workingdir=/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/S1/
 
