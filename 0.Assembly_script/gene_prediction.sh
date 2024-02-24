@@ -244,6 +244,8 @@ perl /data/tools/miniconda3/pkgs/augustus-3.2.2-0/scripts/autoAugTrain.pl --geno
 ##Braker3
 braker.pl   Pipeline for predicting genes with GeneMark-EX and AUGUSTUS with RNA-Seq and/or proteins
 
-srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/braker3.sif braker.pl --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa --species=Ser1 --prot_seq /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa --useexisting --threads 128 \
---workingdir=/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/S1/
+srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/braker3.sif braker.pl --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa.masked --species=Ser1 --prot_seq /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa --useexisting --threads 128 \
+--workingdir=/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/1.Braker/S1/
+srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/braker3.sif braker.pl --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S2_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa.masked --species=Ser2 --prot_seq /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa --useexisting --threads 128 \
+--workingdir=/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/1.Braker/S2/
 
