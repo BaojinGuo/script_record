@@ -238,14 +238,35 @@ cd-hit -i seq.fasta -o seq-out.fasta -c 0.4 -T 4 -n 2
 ###AUGUSTUS
 ##
 
-perl /data/tools/miniconda3/pkgs/augustus-3.2.2-0/scripts/autoAugTrain.pl --genome=Pisum_sativum.Pisum_sativum_v1a.dna_rm.toplevel.fa --trainingset=Pisum_sativum.Pisum_sativum_v1a.58.chr.gff3 --species=Pea
+##perl /data/tools/miniconda3/pkgs/augustus-3.2.2-0/scripts/autoAugTrain.pl --genome=Pisum_sativum.Pisum_sativum_v1a.dna_rm.toplevel.fa --trainingset=Pisum_sativum.Pisum_sativum_v1a.58.chr.gff3 --species=Pea
 
-
-##Braker3
-braker.pl   Pipeline for predicting genes with GeneMark-EX and AUGUSTUS with RNA-Seq and/or proteins
-
+##abitio prediction or donovo prediction
+##Braker3 - gene abitio prediction. busco_lineage 
+#braker.pl   Pipeline for predicting genes with GeneMark-EX and AUGUSTUS with RNA-Seq and/or proteins
+export TMPDIR=/tmp/
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/braker3.sif braker.pl --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa.masked --species=Ser1 --prot_seq /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa --useexisting --threads 128 \
 --workingdir=/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/1.Braker/S1/
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/braker3.sif braker.pl --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S2_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa.masked --species=Ser2 --prot_seq /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa --useexisting --threads 128 \
---workingdir=/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/1.Braker/S2/
+--workingdir=/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/1.Braker/S2/ 
+
+
+##Homology-based prediction
+#Gemoma
+java -jar /data/tools/miniconda3/envs/gene_predict/share/gemoma-1.6.4-1/GeMoMa-1.6.4.jar
+java -jar /scratch/pawsey0399/bguo1/software/GeMoMa-1.9.jar
+module load blast/2.12.0--pl5262h3289130_0
+srun -export=all -n 1 -c 128 java -XX:ParallelGCThreads=128 -jar /scratch/pawsey0399/bguo1/software/GeMoMa-1.9.jar CLI GeMoMaPipeline threads=128 AnnotationFinalizer.r=NO p=false o=true tblastn=true t=/scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S2_HIFI_RESULT/S2_hifi.asm.bp.p_ctg.fa outdir=/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/2.GeMoMa/S2 s=own i=Pea a=/scratch/pawsey0399/bguo1/Ref/Pisum_sativum.Pisum_sativum_v1a.58.chr.gff3 g=/scratch/pawsey0399/bguo1/Ref/Pisum_sativum.Pisum_sativum_v1a.dna.toplevel.fa s=own i=MT a=/scratch/pawsey0399/bguo1/Ref/Medicago_truncatula.MedtrA17_4.0.58.chr.gff3 g=/scratch/pawsey0399/bguo1/Ref/Medicago_truncatula.MedtrA17_4.0.chr.fa s=own i=TP a=/scratch/pawsey0399/bguo1/Ref/Trifolium_pratense.Trpr.58.chr.gff3 g=/scratch/pawsey0399/bguo1/Ref/Trifolium_pratense.Trpr.chr.fa
+srun -export=all -n 1 -c 128 java -XX:ParallelGCThreads=128 -jar /scratch/pawsey0399/bguo1/software/GeMoMa-1.9.jar CLI GeMoMaPipeline threads=128 AnnotationFinalizer.r=NO p=false o=true tblastn=true t=/scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa outdir=/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/2.GeMoMa/S1 s=own i=Pea a=/scratch/pawsey0399/bguo1/Ref/Pisum_sativum.Pisum_sativum_v1a.58.chr.gff3 g=/scratch/pawsey0399/bguo1/Ref/Pisum_sativum.Pisum_sativum_v1a.dna.toplevel.fa s=own i=MT a=/scratch/pawsey0399/bguo1/Ref/Medicago_truncatula.MedtrA17_4.0.58.chr.gff3 g=/scratch/pawsey0399/bguo1/Ref/Medicago_truncatula.MedtrA17_4.0.chr.fa s=own i=TP a=/scratch/pawsey0399/bguo1/Ref/Trifolium_pratense.Trpr.58.chr.gff3 g=/scratch/pawsey0399/bguo1/Ref/Trifolium_pratense.Trpr.chr.fa
+
+#genomeThreader
+srun -export=all -n 1 -c 128 gth -genomic /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa -protein /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa -o /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/3.genomeThreader/S1/S1_gth.gff -gff3out -intermediate
+srun -export=all -n 1 -c 128 gth -genomic /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S2_HIFI_RESULT/S2_hifi.asm.bp.p_ctg.fa -protein /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa -o /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/3.genomeThreader/S2/S2_gth.gff -gff3out -intermediate
+
+#exonerate
+srun -export=all -n 1 -c 128 exonerate -q /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa -t /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa --model protein2genome --bestn 1 --showtargetgff --showalignment no >/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/4.exonerate/S1/S1_exonerate.gff
+srun -export=all -n 1 -c 128 exonerate -q /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa -t /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S2_HIFI_RESULT/S2_hifi.asm.bp.p_ctg.fa --model protein2genome --bestn 1 --showtargetgff --showalignment no >/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/4.exonerate/S2/S2_exonerate.gff
+
+
+
+
 
