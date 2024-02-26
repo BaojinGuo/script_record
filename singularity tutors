@@ -12,6 +12,7 @@ singularity pull docker://dromero93/allmaps
 singularity pull docker://staphb/quast
 singularity pull docker://quay.io/biocontainers/edta:2.2.0--hdfd78af_1
 singularity pull docker://dfam/tetools
+singularity build braker3.sif docker://teambraker/braker3:latest
 
 singularity shell allmaps_lastest.sif
 
