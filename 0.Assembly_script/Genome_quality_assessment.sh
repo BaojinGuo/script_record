@@ -35,6 +35,32 @@ assembly-stats S2_hifi.asm.bp.p_ctg.fa >S2_hifi.asm.bp.p_ctg.fa.stats
 #N_count = 0
 #Gaps = 0
 
+###quast5.2.0 the output will have statistics and some graph; the software is based on minimap2, so if there is a reference, the software could compare your assembles with it and get the uesful information like misassemblies, misassembled contigs, genome fraction, etc..  
+srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/quast_latest.sif python ../../software/quast-5.1.0rc1/quast.py --fragmented -f -b  -t 128 ../01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa -r ../01.hifi_assembly/S2_HIFI_RESULT/S2_hifi.asm.bp.p_ctg.fa -o quast_to_SS --contig-thresholds 0,1000000,5000000,10000000,50000000,80000000
+##Options:
+#-o  --output-dir  <dirname>       Directory to store all result files [default: quast_results/results_<datetime>]
+#-r                <filename>      Reference genome file
+#-g  --features [type:]<filename>  File with genomic feature coordinates in the reference (GFF, BED, NCBI or TXT)
+#                                  Optional 'type' can be specified for extracting only a specific feature type from GFF
+#-m  --min-contig  <int>           Lower threshold for contig length [default: 500]
+#-t  --threads     <int>           Maximum number of threads [default: 25% of CPUs]
+#-f  --gene-finding                    Predict genes using GeneMarkS (prokaryotes, default) or GeneMark-ES (eukaryotes, use --eukaryote)
+#    --mgm                             Use MetaGeneMark for gene prediction (instead of the default finder, see above)
+#    --glimmer                         Use GlimmerHMM for gene prediction (instead of the default finder, see above)
+#    --gene-thresholds <int,int,...>   Comma-separated list of threshold lengths of genes to search with Gene Finding module
+#                                      [default: 0,300,1500,3000]
+#-b  --conserved-genes-finding         Count conserved orthologs using BUSCO (only on Linux)
+#    --operons  <filename>             File with operon coordinates in the reference (GFF, BED, NCBI or TXT)
+#    --est-ref-size <int>              Estimated reference size (for computing NGx metrics without a reference)
+#    --contig-thresholds <int,int,...> Comma-separated list of contig length thresholds [default: 0,1000,5000,10000,25000,50000]
+#    --x-for-Nx <int>                  Value of 'x' for Nx, Lx, etc metrics reported in addition to N50, L50, etc (0, 100) [default: 90]
+#--fragmented                      Reference genome may be fragmented into small pieces (e.g. scaffolded reference) 
+
+
+
+
+
+
 
 
 
