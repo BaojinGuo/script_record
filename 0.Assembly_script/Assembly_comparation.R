@@ -1,4 +1,6 @@
 ### Previous step: Align assembly genomes
+##extract and modify the name of fasta sequences
+#seqkit sort -l -r -i S1_hifi.asm.bp.p_ctg.fa|seqkit head -n 26 |seqkit replace -p .+ -r 'S1_{nr}' -o S1_min1M_rename.fasta
 ## minimap2 -t 128 -x asm5 /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S2_HIFI_RESULT/S2_hifi.asm.bp.p_ctg.fa /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa >S1_TO_S2.paf
 
 # Load necessary libraries
