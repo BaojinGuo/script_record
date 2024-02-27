@@ -16,7 +16,7 @@ singularity build braker3.sif docker://teambraker/braker3:latest
 
 singularity shell allmaps_lastest.sif
 
-
+ singularity pull BUSCO.sif  docker://ezlabgva/busco:v5.6.1_cv1
 
 
 
