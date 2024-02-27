@@ -251,7 +251,13 @@ srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/braker3
 
 
 ##Homology-based prediction
-#Gemoma
+#Gemoma  
+##GeMoMaPipeline  improved behaviour if errors occur if restart=true
+##Running GeMoMaPipeline throws an exception. Can I restart GeMoMaPipeline using intermediate results?
+##Yes, since version 1.7 we have a new parameter in GeMoMaPipeline called restart.
+##If you want to restart the last broken GeMoMaPipeline run, you have to execute GeMoMaPipeline with the same command line as before and add restart=true.
+##If necessary, you can also slightly change the other parameters. However, if the parameters differ too much from those used before, GeMoMaPipeline will decide to perform a new independent run.
+##A restart of GeMoMaPipeline is particularly useful if the time-consuming search (tblastn or mmseqs) was successful, since this can save runtime.
 java -jar /data/tools/miniconda3/envs/gene_predict/share/gemoma-1.6.4-1/GeMoMa-1.6.4.jar
 java -jar /scratch/pawsey0399/bguo1/software/GeMoMa-1.9.jar
 module load blast/2.12.0--pl5262h3289130_0
