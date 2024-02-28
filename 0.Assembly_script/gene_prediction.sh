@@ -144,8 +144,8 @@ BuildDatabase --name db/Serradalle2 S2_hifi.asm.bp.p_ctg.fa#--name is the name o
 ##Error: Unknown argument: "blastdb_version"; here i have this error, maybe due to the blast version, so i modify the BuilDatabase scipt to remove this augument, then it works! 
 
 ##Second run RepeatModeler
-RepeatModeler -database -database db/Serradalle1 -threads 128 -LTRStruct
-RepeatModeler -database -database db/Serradalle2 -threads 128 -LTRStruct
+RepeatModeler -database db/Serradalle1 -threads 128 -LTRStruct
+RepeatModeler -database db/Serradalle2 -threads 128 -LTRStruct
 
 ##Third run RepeatMasker
 RepeatMasker S1_hifi.asm.bp.p_ctg.fa -lib db/Serradalle1-families.fa -e hmmer -xsmall -s -gff -pa 128
