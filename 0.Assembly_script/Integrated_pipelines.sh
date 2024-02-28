@@ -31,6 +31,7 @@ gatk GenotypeGVCFs -OVI True -R $Genome -V {$SAMPLE}.sort.dup.g.vcf -O {$SAMPLE}
 
 ####Minimap2
 minimap2 -ax map-pb -t 128 $Genome $HIFIreads|samtools sort -@ 128 -o {$SAMPLE}.mini2.remap.sort.bam
+samtools index -@ 128 {$SAMPLE}.mini2.remap.sort.bam
 run_deepvariant --model_type=PACBIO --ref $Genome --reads {$SAMPLE}.mini2.remap.sort.bam --output {$SAMPLE}.deepvariants.vcf.gz --intermediate_results_dir {$SAMPLE}_intermediate_results --num_shards 128 --logging_dir {$SAMPLE}_logging
 
 
