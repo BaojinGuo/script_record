@@ -241,7 +241,7 @@ cd-hit -i seq.fasta -o seq-out.fasta -c 0.4 -T 4 -n 2
 ##perl /data/tools/miniconda3/pkgs/augustus-3.2.2-0/scripts/autoAugTrain.pl --genome=Pisum_sativum.Pisum_sativum_v1a.dna_rm.toplevel.fa --trainingset=Pisum_sativum.Pisum_sativum_v1a.58.chr.gff3 --species=Pea
 
 ##abitio prediction or donovo prediction
-##Braker3 - gene abitio prediction. busco_lineage 
+##Braker3 - gene ab initio prediction. busco_lineage 
 #braker.pl   Pipeline for predicting genes with GeneMark-EX and AUGUSTUS with RNA-Seq and/or proteins
 export TMPDIR=/tmp/
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/braker3.sif braker.pl --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa.masked --species=Ser1 --prot_seq /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa --useexisting --threads 128 \
