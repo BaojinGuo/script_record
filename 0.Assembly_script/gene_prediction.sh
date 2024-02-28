@@ -272,7 +272,7 @@ srun -export=all -n 1 -c 128 gth -genomic /scratch/pawsey0399/bguo1/0.assembly/0
 srun -export=all -n 1 -c 128 exonerate -q /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa -t /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa --model protein2genome --bestn 1 --showtargetgff --showalignment no >/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/4.exonerate/S1/S1_exonerate.gff
 srun -export=all -n 1 -c 128 exonerate -q /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa -t /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S2_HIFI_RESULT/S2_hifi.asm.bp.p_ctg.fa --model protein2genome --bestn 1 --showtargetgff --showalignment no >/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/4.exonerate/S2/S2_exonerate.gff
 
-
+#Evidence Moduler
 
 
 
