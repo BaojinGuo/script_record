@@ -1,5 +1,5 @@
 ####EDTA+REPEATMASKER annotate TE
-###EDTA INSTALL
+###EDTA2.2.0 INSTALL
 singularity pull docker://quay.io/biocontainers/edta:2.2.0--hdfd78af_1
 ###download congeneric species' cds 
 wget https://ftp.ensemblgenomes.ebi.ac.uk/pub/plants/release-58/fasta/pisum_sativum/cds/Pisum_sativum.Pisum_sativum_v1a.cds.all.fa.gz
