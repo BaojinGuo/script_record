@@ -45,7 +45,7 @@ RepeatModeler -database Ser1 --threads 128 -LTRStruct
 RepeatMasker $Genome -lib Ser1-families.fa -e rmblast -xsmall -s gff -pa 128
 
 04.Gene annotation
-####Braker-den ovo prediction
+####Braker-den ovo prediction, if RNA-Seq data is available, using in this step
 braker.pl --genome $Genome --species=Ser1 --prot_seq allhomo.pep.cdhit.fa --useexisting --threads 128 --workingdir={$SAMPLE}_workdiction ##allhomo.pep.cdhit.fa is the nonredundant homologous proteins based on related species and removed duplicated by CD-Hit 
 ####Homology-based prediction
 ###Gemoma
@@ -56,7 +56,7 @@ gth -genomic $Genome -protein allhomo.pep.cdhit.fa -o {$SAMPLE}_gth.gff -gff3out
 exonerate -q allhomo.pep.cdhit.fa -t $Genome --model pretein2genome --blastn 1 --showtargetgff --showalignment no >{$SAMPLE}_exonerate.gff ####high memmory required, due to memmory limited, using --targetchunkid --targetchunktotal
 
 
-
+####Evidence Moduler, Integration of gene prediction results
 
 
 
