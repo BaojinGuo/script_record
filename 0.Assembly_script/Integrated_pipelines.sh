@@ -46,7 +46,8 @@ RepeatModeler -database Ser1 --threads 128 -LTRStruct
 RepeatMasker $Genome -lib Ser1-families.fa -e rmblast -xsmall -s gff -pa 128
 
 04.Gene annotation
-####the genome here should use masked genome from EDTA, namely $Genome.mod.MAKER.masked
+####the genome here should use soft-masked genome, however from EDTA, namely $Genome.mod.MAKER.masked is a hard masked, so using RepeatMasker to make a soft masked genome
+RepeatMasker $Genome -lib $EDTA_TElib.fa -e rmblast -xsmall -s -gff -pa 128
 ####Braker-den ovo prediction, if RNA-Seq data is available, using in this step
 braker.pl --genome $Genome --species=Ser1 --prot_seq allhomo.pep.cdhit.fa --useexisting --threads 128 --workingdir={$SAMPLE}_workdiction ##allhomo.pep.cdhit.fa is the nonredundant homologous proteins based on related species and removed duplicated by CD-Hit 
 ####Homology-based prediction
