@@ -22,7 +22,7 @@ srun --export=all -n 1 -c 128 gatk GenotypeGVCFs -OVI True -R /scratch/pawsey039
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/minimap2.sif minimap2 -ax map-pb -t 128 /scratch/pawsey0399/bguo1/0.assembly/02.quality_assessmnet/02.remap/00.index/S1_hifi.asm.bp.p_ctg.fa /scratch/pawsey0399/bguo1/0.assembly/Raw_data/s1_hifi.fastq.gz |samtools sort -@ 128 -o S1/S1_mini2_remap.sort.bam
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/minimap2.sif minimap2 -ax map-pb -t 128 /scratch/pawsey0399/bguo1/0.assembly/02.quality_assessmnet/02.remap/00.index/S2_hifi.asm.bp.p_ctg.fa /scratch/pawsey0399/bguo1/0.assembly/Raw_data/s2_hifi.fastq.gz |samtools sort -@ 128 -o S2/S2_mini2_remap.sort.bam
 
-run_deepvariant.py --model_type=PACBIO --ref $Genome --reads {$SAMPLE}.mini2.remap.sort.bam --output {$SAMPLE}.deepvariants.vcf.gz --intermediate_results_dir {$SAMPLE}_intermediate_results --num_shards=128 --logging_dir {$SAMPLE}_logging
+run_deepvariant.py --model_type=PACBIO --ref $Genome --reads {$SAMPLE}.mini2.remap.sort.bam --output_vcf {$SAMPLE}.deepvariants.vcf.gz --intermediate_results_dir {$SAMPLE}_intermediate_results --num_shards=128 --logging_dir {$SAMPLE}_logging
 
 
 
