@@ -56,7 +56,7 @@ java -XX:ParallelGCThreads=128 $GeMoMa-1.9.jar CLI GeMoMaPipeline threads=128 An
 ###genomeThreader
 gth -genomic $Genome -protein allhomo.pep.cdhit.fa -o {$SAMPLE}_gth.gff -gff3out -intermediate
 ###exonerate
-exonerate -q allhomo.pep.cdhit.fa -t $Genome --model pretein2genome --blastn 1 --showtargetgff --showalignment no >{$SAMPLE}_exonerate.gff ####high memmory required, due to memmory limited, using --targetchunkid --targetchunktotal
+exonerate -q allhomo.pep.cdhit.fa -t $Genome --model pretein2genome --blastn 1 --showtargetgff --showalignment no >{$SAMPLE}_exonerate.gff ####high memmory required, due to memmory limited, using --targetchunkid --targetchunktotal, -c sets threads
 
 
 ####Evidence Moduler, Integration of gene prediction results
