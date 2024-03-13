@@ -51,7 +51,8 @@ exonerate
 
 ###Install EvidenceModeler v2.1.0
 ##git clone https://github.com/EVidenceModeler/EVidenceModeler.git
-
+#Run 'make' to build the required ParaFly cmd parallel execution utility.
+#(If plugins/ParaFly is missing, first run: git submodule init && git submodule update to incorporate the included ParaFly submodule)
 
 ###Install RepeatMsker v4.1.6
 ##in setonix, using singularity container, just singularity pull docker://pegi3s/repeat_masker
@@ -273,6 +274,22 @@ srun -export=all -n 1 -c 128 exonerate -q /scratch/pawsey0399/bguo1/0.assembly/0
 srun -export=all -n 1 -c 128 exonerate -q /scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/Ref_pep/allhomo.pep.cdhit.fa -t /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S2_HIFI_RESULT/S2_hifi.asm.bp.p_ctg.fa --model protein2genome --bestn 1 --showtargetgff --showalignment no >/scratch/pawsey0399/bguo1/0.assembly/03.gene_annotation/4.exonerate/S2/S2_exonerate.gff
 
 #Evidence Moduler
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/braker_GTF_to_EVM_GFF3.pl braker.gtf >S1_braker_evm.gff3
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/braker_GTF_to_EVM_GFF3.pl braker.gtf >S2_braker_evm.gff3
 
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/GeMoMa_gff_to_gff3.pl final_annotation.gff >S1_MT_gemoma_evm.gff3
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/GeMoMa_gff_to_gff3.pl final_annotation.gff >S2_MT_gemoma_evm.gff3
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/GeMoMa_gff_to_gff3.pl final_annotation.gff >S1_TP_gemoma_evm.gff3
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/GeMoMa_gff_to_gff3.pl final_annotation.gff >S2_TP_gemoma_evm.gff3
+
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/genomeThreader_to_evm_gff3.pl S1_gth.gff >S1_gth_evm.gff3
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/genomeThreader_to_evm_gff3.pl S2_gth.gff >S2_gth_evm.gff3
+
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/exonerate_gff_to_alignment_gff3.pl S1.exonerate.gff >S1_exo_pro.gff
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/exonerate_gff_to_alignment_gff3.pl S2.exonerate.gff >S2_exo_pro.gff
+
+##put the same sample results to the same file
+
+EVidenceModeler --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa.masked --weights weights.txt --gene_predictions S1_braker_evm.gff3 --protein_alignments S1_exo_evm.gff3 --CPU 128 --sample_id S1 --segmentSize 1000000 --overlapSize 10000
 
 
