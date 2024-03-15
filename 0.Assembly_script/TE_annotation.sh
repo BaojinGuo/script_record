@@ -21,3 +21,13 @@ srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/edta_2.
 ##-anno: 是否在构建TE文库后进行全基因组预测，默认是0.
 ##-evalues: 默认是0，需要同时设置-anno 1才能使用。能够评估注释质量，但会显著增加分析时间。
 ##–overwrite默认是0，设定为1会删除已有结果重新运行，建议保持默认，运行中断可以继续运行。
+
+###LAI 
+LAI -t 128 -genome S1/S1_hifi.asm.bp.p_ctg.fa -intact S1/S1_hifi.asm.bp.p_ctg.fa.mod.EDTA.raw/LTR/S1_hifi.asm.bp.p_ctg.fa.mod.pass.list -all S1/S1_hifi.asm.bp.p_ctg.fa.mod.EDTA.anno/S1_hifi.asm.bp.p_ctg.fa.mod.out >S1.LAI.out
+LAI -t 128 -genome S2/S2_hifi.asm.bp.p_ctg.fa -intact S2/S2_hifi.asm.bp.p_ctg.fa.mod.EDTA.raw/LTR/S2_hifi.asm.bp.p_ctg.fa.mod.pass.list -all S2/S2_hifi.asm.bp.p_ctg.fa.mod.EDTA.anno/S2_hifi.asm.bp.p_ctg.fa.mod.out >S2.LAI.out
+
+
+
+
+
+
