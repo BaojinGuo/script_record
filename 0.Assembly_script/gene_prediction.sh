@@ -288,8 +288,23 @@ perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/genomeThre
 perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/exonerate_gff_to_alignment_gff3.pl S1.exonerate.gff >S1_exo_pro.gff
 perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/exonerate_gff_to_alignment_gff3.pl S2.exonerate.gff >S2_exo_pro.gff
 
-##put the same sample results to the same file
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/exonerate_to_evm_gff3.pl S1_exonerate.gff >S1_exonerate_evm.gff3
+perl /scratch/pawsey0399/bguo1/software/EVidenceModeler/EvmUtils/misc/exonerate_to_evm_gff3.pl S2_exonerate.gff >S2_exonerate_evm.gff3
+##put the same sample results to the same file, and comobine the same type file
+ cat S1_braker_evm.gff3 S1_gth_evm.gff3 >S1_geneprediction.gff3
+ cat S1_exo_evm.gff3 S1_*_gemoma_evm* >S1_proteinprediction.gff3
+ cat S2_braker_evm.gff3 S2_gth_evm.gff3 >S2_geneprediction.gff3
+ cat S2_exo_evm.gff3 S2_*_gemoma_evm* >S2_proteinprediction.gff3
+ 
+EVidenceModeler --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa.masked --weights weights.txt --gene_predictions S1_geneprediction.gff3 --protein_alignments S1_proteinprediction.gff3 --CPU 128 --sample_id S1 --segmentSize 1000000 --overlapSize 10000
+EVidenceModeler --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S2_HIFI_RESULT/S2_hifi.asm.bp.p_ctg.fa.masked --weights weights.txt --gene_predictions S2_geneprediction.gff3 --protein_alignments S2_proteinprediction.gff3 --CPU 128 --sample_id S2 --segmentSize 1000000 --overlapSize 10000
+#
+#less weights.txt, due to the braker3 results, so AUGUSTUS and GeneMark.hmm3 weight is four
+#ABINITIO_PREDICTION     AUGUSTUS        4
+#ABINITIO_PREDICTION     GeneMark.hmm3   4
+#PROTEIN exonerate       8
+#PROTEIN GeMoMa  8
+#OTHER_PREDICTION        genomeThreader  8
 
-EVidenceModeler --genome /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa.masked --weights weights.txt --gene_predictions S1_braker_evm.gff3 --protein_alignments S1_exo_evm.gff3 --CPU 128 --sample_id S1 --segmentSize 1000000 --overlapSize 10000
 
 
