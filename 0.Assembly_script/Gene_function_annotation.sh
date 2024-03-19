@@ -1,8 +1,8 @@
 ###Download databases & software
-wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz ##swissprot
-wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz ##treml
-wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz ##NR
-##eggnog
+wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz ##swissprot, modified 2024-01-24
+wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz ##treml, modified 2024-01-24
+wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz ##NR,2024-02-08
+##eggnog,modified 2021-03-02 (30% iedntity--Ref: Assignment of homology to genome sequences using a library of hidden Markov models that represent all proteins of known structure)
 wget http://eggnog5.embl.de/download/emapperdb-5.0.2/eggnog_proteins.dmnd.gz
 wget http://eggnog5.embl.de/download/emapperdb-5.0.2/eggnog.taxa.tar.gz
 wget http://eggnog5.embl.de/download/emapperdb-5.0.2/eggnog.db.gz 
