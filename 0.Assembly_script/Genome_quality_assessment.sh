@@ -61,7 +61,10 @@ wget -c https://busco.ezlab.org/datasets/eukaryota_odb10.2024-01-08.tar.gz
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/BUSCO.sif busco -i /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S1_HIFI_RESULT/S1_hifi.asm.bp.p_ctg.fa -o S1/S1_busco -m genome -l /scratch/pawsey0399/bguo1/0.assembly/02.quality_assessmnet/03.BUSCO/eukaryota_odb10 --cpu 128 --offline
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/BUSCO.sif busco -i /scratch/pawsey0399/bguo1/0.assembly/01.hifi_assembly/S2_HIFI_RESULT/S2_hifi.asm.bp.p_ctg.fa -o S2/S2_busco -m genome -l /scratch/pawsey0399/bguo1/0.assembly/02.quality_assessmnet/03.BUSCO/eukaryota_odb10 --cpu 128 --offline
 
+mv $short_summary.specific.fabales_odb10.fabales_S1.txt plot/short_summary.specific.fabales_odb10.Fabales_S1.txt 
+mv $short_summary.specific.fabales_odb10.fabales_S2.txt plot/short_summary.specific.fabales_odb10.Fabales_S2.txt 
+mv $short_summary.specific.embryophyta_odb10.embryophyta_S1.txt plot/short_summary.specific.embryophyta_odb10.Embryophyta_S1.txt 
+mv $short_summary.specific.embryophyta_odb10.embryophyta_S2.txt plot/short_summary.specific.embryophyta_odb10.Embryophyta_S2.txt
 
-
-
+generate_plot.py -wd plot/
 
