@@ -26,7 +26,11 @@ srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/edta_2.
 LAI -t 128 -genome S1/S1_hifi.asm.bp.p_ctg.fa -intact S1/S1_hifi.asm.bp.p_ctg.fa.mod.EDTA.raw/LTR/S1_hifi.asm.bp.p_ctg.fa.mod.pass.list -all S1/S1_hifi.asm.bp.p_ctg.fa.mod.EDTA.anno/S1_hifi.asm.bp.p_ctg.fa.mod.out >S1.LAI.out
 LAI -t 128 -genome S2/S2_hifi.asm.bp.p_ctg.fa -intact S2/S2_hifi.asm.bp.p_ctg.fa.mod.EDTA.raw/LTR/S2_hifi.asm.bp.p_ctg.fa.mod.pass.list -all S2/S2_hifi.asm.bp.p_ctg.fa.mod.EDTA.anno/S2_hifi.asm.bp.p_ctg.fa.mod.out >S2.LAI.out
 
-
+###Modify insertion time, because of If the parameter --u is not set in edta, the default insertion time 1.3e-8 for gramineae is used to calculate the insertion time, so we should transform it to the specific crop. 
+###git clone https://gitee.com/zheng-tianze/time_convert.py.git
+###time_convert.py input.txt 3e-10; Among them, the input. TXT file for input, generally for EDTA output file XX.fa.mod.EDTA.raw/LTR/XX.fa.mod.pass.list. 3e-10 is the mutation rate of the species, here changed to the mutation rate of the species itself.
+time_convert.py ../S1/S1_hifi.asm.bp.p_ctg.fa.mod.EDTA.raw/LTR/S1_hifi.asm.bp.p_ctg.fa.mod.pass.list 7e-9
+time_convert.py ../S2/S2_hifi.asm.bp.p_ctg.fa.mod.EDTA.raw/LTR/S2_hifi.asm.bp.p_ctg.fa.mod.pass.list 7e-9
 
 
 
