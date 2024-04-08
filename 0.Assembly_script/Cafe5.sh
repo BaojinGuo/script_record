@@ -1,4 +1,4 @@
-###Cafe5 is a software for gene expansion and constriction
+###Cafe5 is a software for gene expansion and constriction, https://github.com/hahnlab/CAFE5
 ##Installation
 git clone https://github.com/hahnlab/CAFE5/releases
 cd CAFE5
@@ -23,5 +23,14 @@ tail -n 1 r8s_tmp.txt|cut -c 16- >r8s_ultrametric.txt
 #running CAFE5
 cafe5 -c 128 -i Gene.counts.filter -t r8s_ultrametric.txt -o out #-c cores, CPU number; -i gene family numbers; -t tree files; -o output path; -p possion distribution otherwise uniform distribution
 
+#subset any species significant expansion and constriction genes
+cat Base_family_results.txt |grep 'y' |cut -f1|grep -f - Base_change.tab |cut -f1,3|awk '$2>0' >S2.sinnificant.expand.ID
+cat Base_family_results.txt |grep 'y' |cut -f1|grep -f - Base_change.tab |cut -f1,3|awk '$2<0' >S2.sinnificant.constrict.ID
+cut -f1 S1.sinnificant.expand.ID |grep -f - ../../06.Orthofinder/0.workdic/02.prj/OrthoFinder/Results_Apr04/Orthogroups/Orthogroups.tsv |cut -f14|sed "s/ /\n/g"|sed "s/\t/\n/g"| sed "s/,//g"|sort|uniq >S1.significant.expand.genes
+cut -f1 S1.sinnificant.constrict.ID |grep -f - ../../06.Orthofinder/0.workdic/02.prj/OrthoFinder/Results_Apr04/Orthogroups/Orthogroups.tsv |cut -f14|sed "s/ /\n/g"|sed "s/\t/\n/g"| sed "s/,//g"|sort|uniq >S1.significant.constrict.genes
 
+cut -f1 S2.sinnificant.expand.ID |grep -f - ../../06.Orthofinder/0.workdic/02.prj/OrthoFinder/Results_Apr04/Orthogroups/Orthogroups.tsv |cut -f15|sed "s/ /\n/g"|sed "s/\t/\n/g"| sed "s/,//g"|sort|uniq >S2.significant.expand.genes
+cut -f1 S2.sinnificant.constrict.ID |grep -f - ../../06.Orthofinder/0.workdic/02.prj/OrthoFinder/Results_Apr04/Orthogroups/Orthogroups.tsv |cut -f15|sed "s/ /\n/g"|sed "s/\t/\n/g"| sed "s/,//g"|sort|uniq >S2.significant.constrict.genes
+
+#final step is make enrichment analysis
 
