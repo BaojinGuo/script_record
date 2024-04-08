@@ -83,3 +83,19 @@ enrich.res <- enricher(gene = geneList, # gene list
          qvalueCutoff = 0.05, 
          TERM2GENE = TERM2GENE, 
          TERM2NAME = TERM2NAME)
+
+
+gene<-read.table("S2.significant.constrict.genes",header = F)
+gene<-as.character(gene[,1])
+GOdb<-read.csv("GO_db.csv",header = T)
+GOgene<-read.csv("S2_Gene_Go.csv",header = T)
+term2gene<-GOgene[,c(2,1)]
+term2name<-GOdb[,c(1,2)]
+cons_go_all<-enricher(gene=gene,pvalueCutoff = 1,qvalueCutoff = 1,pAdjustMethod = "fdr",TERM2GENE = term2gene,TERM2NAME = term2name)
+cons_go<-enricher(gene=gene,pvalueCutoff = 0.05,qvalueCutoff = 0.05,pAdjustMethod = "fdr",TERM2GENE = term2gene,TERM2NAME = term2name)
+write.csv(cons_go_all,"S2_cons_go_all.csv",row.names = F)
+barplot(cons_go)
+dotplot(cons_go)
+
+
+
