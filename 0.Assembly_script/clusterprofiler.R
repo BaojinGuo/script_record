@@ -98,4 +98,14 @@ barplot(cons_go)
 dotplot(cons_go)
 
 
-
+gene<-read.table("S2.significant.constrict.genes",header = F)
+gene<-as.character(gene[,1])
+KEGGdb<-read.csv("KEGG_db.csv",header = T)
+KEGGgene<-read.csv("S2_Gene_kegg_new.csv",header = T)
+term2gene<-KEGGgene[,c(2,1)]
+term2name<-KEGGdb[,c(1,2)]
+kegg_all<-enricher(gene=gene,pvalueCutoff = 1,qvalueCutoff = 1,pAdjustMethod = "fdr",TERM2GENE = term2gene,TERM2NAME = term2name)
+kegg<-enricher(gene=gene,pvalueCutoff = 0.05,qvalueCutoff = 0.05,pAdjustMethod = "fdr",TERM2GENE = term2gene,TERM2NAME = term2name)
+write.csv(kegg_all,"S2_constrict_kegg_all.csv",row.names = F)
+dotplot(kegg)
+barplot(kegg)
