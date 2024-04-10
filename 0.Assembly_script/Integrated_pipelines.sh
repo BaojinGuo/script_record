@@ -7,7 +7,7 @@ HIFIoutput=HIFI_assembly.asm ###this is a prefix, whole name of used file here w
 Genome=HIFI_assembly.fa
 Ref=Ref.fa
 01.Genome assembly
-hifiasm -o $HIFIoutput -t128 -l0 $HIFIreads
+hifiasm -o $HIFIoutput -t128 -l0 $HIFIreads #-l0 maybe unnecessary.
 gfatools gfa2fa $HIFIoutput > $Genome
 
 02.Genome quality assessment
