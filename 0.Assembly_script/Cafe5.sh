@@ -39,8 +39,8 @@ cut -f1 S1_specialgenes_toallspecies.tsv |grep -f - ../06.Orthofinder/0.workdic/
 cut -f1 S2_specialgenes_toallspecies.tsv |grep -f - ../06.Orthofinder/0.workdic/02.prj/OrthoFinder/Results_Apr04/Orthogroups/Orthogroups.tsv |cut -f15|sed "s/ /\n/g"|sed "s/\t/\n/g"| sed "s/,//g"|sort|uniq > S2_allspecies_special.genes
 
 ##subset S1 special compared to S2 and S2 special genes compared to S1
-awk -F'\t' 'NR == 1 || $3 !="0" && $2="0"' Orthogroups.GeneCount.s1s2.tsv >S2_comapreS1_special.tsv
-awk -F'\t' 'NR == 1 || $2 !="0" && $3="0"' Orthogroups.GeneCount.s1s2.tsv >S1_comapreS2_special.tsv
+awk -F'\t' 'NR == 1 || ($3 != "0" && $2 == "0")' Orthogroups.GeneCount.s1s2.tsv >S2_comapreS1_special.tsv
+awk -F'\t' 'NR == 1 || ($2 != "0" && $3 == "0")' Orthogroups.GeneCount.s1s2.tsv >S1_comapreS2_special.tsv
 cut -f1 S1_comapreS2_special.tsv |grep -f - ../06.Orthofinder/0.workdic/02.prj/OrthoFinder/Results_Apr04/Orthogroups/Orthogroups.tsv |cut -f14|sed "s/ /\n/g"|sed "s/\t/\n/g"| sed "s/,//g"|sort|uniq > S1_compareS2_special.genes
 cut -f1 S2_comapreS1_special.tsv |grep -f - ../06.Orthofinder/0.workdic/02.prj/OrthoFinder/Results_Apr04/Orthogroups/Orthogroups.tsv |cut -f15|sed "s/ /\n/g"|sed "s/\t/\n/g"| sed "s/,//g"|sort|uniq > S2_compareS1_special.genes
 
