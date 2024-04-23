@@ -7,3 +7,8 @@ ls */syri/*/*.out|grep 3504|while read line
   done
 #run script unique_ins.py 
 python unique_ins.py -F 3504_CS21syri.out -L list.syri.txt -O 3504_CS21syri.unique_insertion.out
+#extract desirable length insertion sequences
+awk '$8 - $7 > 10000 && $8 - $7 < 50000 {print $0}' 3504_CS21syri.unique_insertion.out > 3504_unique_insertion.10k_to_50k.out
+cut -f6,7,8 3504_unique_insertion.10k_to_50k.out >3504_unique_insertion.10k_to_50k.bed
+bedtools getfasta -fi ../../../3504_map_field/3504.v1.fa -bed 3504_unique_insertion.10k_to_50k.bed -fo 3504_unique_insertion.10k_to_50k.fa
+
