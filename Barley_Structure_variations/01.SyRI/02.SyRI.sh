@@ -1,4 +1,4 @@
-ls *.sam|cut -f1 -d"."|while read line; do echo '#!/bin/bash
+ls *.sam|cut -f1 -d"."|while read line; do mkdir -p 01.result/$line; echo '#!/bin/bash
 #SBATCH --job-name=syri
 #SBATCH --partition=work
 #SBATCH --nodes=1
