@@ -1,4 +1,7 @@
- ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sort.bam}; echo '#!/bin/bash
+ls *.bam|while read line; do srun -n 1 -c 128 samtools index -c -@ 128 $line & 
+done ###all bam files should be indexed.
+
+ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sort.bam}; echo '#!/bin/bash
 #SBATCH --job-name=sniffles
 #SBATCH --partition=work
 #SBATCH --nodes=1
