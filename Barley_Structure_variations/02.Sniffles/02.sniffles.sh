@@ -10,5 +10,5 @@ ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$lin
 #SBATCH --time=24:00:00
 #SBATCH --account=pawsey0399
 source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate sniffle
-srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.Morex.vcf --reference Morex.V3.chr.fasta --snf 02.sniffles/'"$prefix"'.Morex.snf --threads 128' >$prefix.sniffle.sh 
+srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.Morex.vcf --reference Morex.V3.chr.fasta --snf 02.sniffles/'"$prefix"'.Morex.snf --threads 128 --minsupport 1 --long-ins-length 100000000   --long-del-length 100000000' >$prefix.sniffle.sh 
 done
