@@ -4,6 +4,8 @@
 #here there are four methods to settle down the order
 
 library(ggplot2)
+custom_colors <- c("DEL" = "#66c2a5", "DUP" = "#fc8d62", "INS" = "#8da0cb", "INV" = "#e78ac3")
+
 data<-read.table("barley.all.SV.plot.txt",header = T)
 #Accession Chromosome Position Type
 #Baudin         1H   180730  INS 
