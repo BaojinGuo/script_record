@@ -20,3 +20,17 @@ ggplot(data, aes(x = Accession, fill = Accession)) +
     theme(legend.text = element_text(size = 16))+
     theme(plot.title = element_text(hjust = 0.5))+
     guides(fill = guide_legend(ncol = 1))  # Arrange legend items in one column
+
+
+
+
+
+
+#########################################################################################################################################
+##this is for AUS specific SV chromosome distribution
+data<-read.table("AUS_specific_SV.sites",col.names = c("Chr","Pos","Type"))
+ggplot(data,aes(x=Chr,fill=Chr))+geom_bar(position = "dodge")+theme_minimal()+geom_text(stat = "count", aes(label = after_stat(count)), position = position_dodge(width = 0.9), hjust = 0.5, vjust = 0.5, angle = 0) +labs(x = "", y = "", title = "Specific SVs in Austrilian barley accession") +facet_grid(Type ~ ., scales = "free", switch = "y")+theme(axis.text.x = element_text(angle = 0, hjust = 1))+ # Rotate x-axis labels for better readability
+    theme(text = element_text(family = "Times New Roman", face = "bold", size = 20))+
+    theme(axis.text = element_text(size = 16,face = "bold"))+
+    theme(legend.text = element_text(size = 16))+
+    theme(plot.title = element_text(hjust = 0.5))+theme(legend.position = "none")
