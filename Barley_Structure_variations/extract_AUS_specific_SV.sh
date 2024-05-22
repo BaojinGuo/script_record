@@ -94,12 +94,12 @@ BEGIN {
     other_0_0 = 0;
     other_1_1 = 0;
     for (i = 1; i <= length(aus); i++) {
-        if ($(i+4) == "1/1") aus_1_1++;
-        if ($(i+4) == "0/0") aus_0_0++;
+        if ($(i+5) == "1/1") aus_1_1++;
+        if ($(i+5) == "0/0") aus_0_0++;
     }
     for (i = length(aus) + 1; i <= length(aus) + length(other); i++) {
-        if ($(i+4) == "0/0") other_0_0++;
-        if ($(i+4) == "1/1") other_1_1++;
+        if ($(i+5) == "0/0") other_0_0++;
+        if ($(i+5) == "1/1") other_1_1++;
     }
     if ((aus_1_1 > 15 && other_0_0 > 5) || (aus_0_0 > 15 && other_1_1 > 5)) {
         print $0
