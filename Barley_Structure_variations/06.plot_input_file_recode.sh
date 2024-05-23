@@ -32,12 +32,13 @@ done
 cat *.txt |grep -v Accession|sed '1i Accession\tChromosome\tPosition\tType' >Barley.hte_to_miss80_maf25.allSV.txt
 ##eighth step, delete lines Clipper have
 library(dplyr)
-setwd("Downloads/5.23/")
-data<-read.table("Barley.hte_to_miss80_maf25.allSV.txt",header = t)
-data<-read.table("Barley.hte_to_miss80_maf25.allSV.txt",header = t)
 data<-read.table("Barley.hte_to_miss80_maf25.allSV.txt",header = T)
 clipper_data <- filter(data, Accession == "Clipper")
 filtered_data <- data %>%
 anti_join(clipper_data, by = c("Chromosome", "Position", "Type"))
 write.table(filtered_data, "Barley.hte_to_miss80_maf25.allSV_noClipper.txt", sep = "\t", row.names = FALSE, quote = FALSE)
+######ninth step, statistic SV length
+bcftools query -f '%CHROM\t%POS\t%INFO/SVTYPE\t%INFO/SVLEN\n' 2.combineSV_Clipper_sniffle_het_to_miss80_maf25.recode.vcf |grep -v BND >4.combineSV_Clipper_sniffle_het_to_miss80_maf25.svlength
+
+
 
