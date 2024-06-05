@@ -2,6 +2,19 @@
 ##contents;ls
 Akshinriki_1.fq.gz  Akshinriki_2.fq.gz	Clipper_1.fq.gz  Clipper_2.fq.gz  Hockett_1.fq.gz  Hockett_2.fq.gz  Stirling_1.fq.gz  Stirling_2.fq.gz	Vlamingh_1.fq.gz  Vlamingh_2.fq.gz
 
+##raw data to clean reads
+ ls *_1.fq.gz | cut -f1 -d "_" | while read line; do   echo '#!/bin/bash
+#SBATCH --job-name=fastp
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate fastp
+srun --export=all -n 1 -c 128 fastp -i '$line'_1.fq.gz -I '$line'_2.fq.gz -o '$line'_clean_1.fq.gz -O '$line'_clean_2.fq.gz -w 128 '>$line.fastp.sh; done
+
+
 ls *_1.fq.gz | cut -f1 -d "_" | while read line; do
   echo '#!/bin/bash
 #SBATCH --job-name=BWA
@@ -13,7 +26,7 @@ ls *_1.fq.gz | cut -f1 -d "_" | while read line; do
 #SBATCH --account=pawsey0399
 module load bwa/0.7.17--h7132678_9
 module load samtools/1.15--h3843a85_0
-srun --export=all -n 1 -c 128 bwa mem -t 128 -R "@RG\tID:'$line'\tPL:illumina\tLB:library\tSM:'$line'" MorexV3.fa '${line}'_1.fq.gz '${line}'_2.fq.gz | samtools sort -@ 128 -o '${line}'_MorexV3.bwa.sort.bam' > ${line}.bwa.sh
+srun --export=all -n 1 -c 128 bwa mem -t 128 -R "@RG\tID:'$line'\tPL:illumina\tLB:library\tSM:'$line'" MorexV3.fa '${line}'_clean_1.fq.gz '${line}'_clean_2.fq.gz | samtools sort -@ 128 -o 01.bwa/'${line}'_MorexV3.bwa.sort.bam' > ${line}.bwa.sh
 done
 
 ####For Hifi reads
