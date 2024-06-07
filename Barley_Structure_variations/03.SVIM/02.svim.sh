@@ -11,7 +11,7 @@ filename=$(basename "$line"); prefix=${filename%.Morex.sort.bam}; echo '#!/bin/b
 #SBATCH --time=24:00:00
 #SBATCH --account=pawsey0399
 source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate svim
-srun --export=all -n 1 -c 128 svim alignment 02.results/'"$prefix"' 01.minimap/'"$line"' Morex.V3.chr.fasta  --min_sv_size 50 --sample '"$prefix"' '>$prefix.svim.sh
+srun --export=all -n 1 -c 128 svim alignment 02.results/'"$prefix"' 01.minimap/'"$line"' MorexV3.fa  --minimum_depth 5 --min_sv_size 50 --sample '"$prefix"' '>$prefix.svim.sh
 done
 ##don't add the parameter --symbolic_alleles due to SURVIVOR does not support implicit ALT
 
