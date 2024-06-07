@@ -45,5 +45,22 @@ module load singularity/4.1.0-nompi
 module load samtools/1.15--h3843a85_0
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/minimap2.sif minimap2 -ax map-hifi -c --MD -R '"'@RG\tID:"$prefix"\tSM:"$prefix"'"' -I100g -t 128 -Y MorexV3.fa '"$line"' |samtools sort -@ 128 -O BAM -o 01.minimap/'"$prefix"'.Morex.sort.bam' >$prefix.mini.sh; done
 
+###determine raw data depth
+samtools index -c ${line}_MorexV3.bwa.sort.bam
+samtools depth ${line}_MorexV3.bwa.sort.bam >${line}.depth
+awk '{sum += $3; count += 1} END {if (count > 0) print sum / count}' ${line}.depth >${line}.depth.av
+
+###according to depth, split raw fastq to 5X, 10X, 15X depth fastq, -s need to be same.
+seqkit sample -p $partition -j 16 -s 11 Vlamingh_clean_1.fq.gz|gzip >1.split/Vlamingh_clean5X_1.fq.gz
+seqkit sample -p $partition -j 16 -s 11 Vlamingh_clean_2.fq.gz|gzip >1.split/Vlamingh_clean5X_2.fq.gz
+
+
+
+
+
+
+
+
+
 
 
