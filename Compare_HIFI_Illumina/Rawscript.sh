@@ -178,9 +178,40 @@ ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$lin
 source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate sniffle
 srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.sr.Morex.vcf --reference MorexV3.fa --snf 02.sniffles/'"$prefix"'.sr.Morex.snf --threads 128 --minsupport 1 --long-ins-length 100000000 --long-del-length 100000000' >$prefix.sr.sniffle.sh ; done
 
+ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sr.sort.bam}; echo '#!/bin/bash
+#SBATCH --job-name=Deepvariant
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+module load singularity/4.1.0-nompi
+srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/deepvariant_latest.sif run_deepvariant --model_type WGS --ref MorexV3.fa --reads 01.minimap/'$line' --sample_name '$prefix'_sr --output_vcf 03.Deepvariant/'$prefix'.sr.mini.deep.vcf.gz --num_shards 128 --logging_dir 03.Deepvariant/'$prefix'.sr.deep.log' >$prefix.sr.deep.sh; done
+
+###lr: minimap + sniffle + deepvariant
+ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sort.bam}; echo '#!/bin/bash
+#SBATCH --job-name=sniffles
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=2:00:00
+#SBATCH --account=pawsey0399
+source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate sniffle
+srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.lr.Morex.vcf --reference MorexV3.fa --snf 02.sniffles/'"$prefix"'.lr.Morex.snf --threads 128 --minsupport 1 --long-ins-length 100000000 --long-del-length 100000000' >$prefix.lr.sniffle.sh ; done
 
 
-
+ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sort.bam}; echo '#!/bin/bash
+#SBATCH --job-name=Deepvariant
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+module load singularity/4.1.0-nompi
+srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/deepvariant_latest.sif run_deepvariant --model_type PACBIO --ref MorexV3.fa --reads 01.minimap/'$line' --sample_name '$prefix'_lr --output_vcf 03.Deepvariant/'$prefix'.lr.mini.deep.vcf.gz --num_shards 128 --logging_dir 03.Deepvariant/'$prefix'.lr.deep.log' >$prefix.lr.deep.sh; don
 
 
 
