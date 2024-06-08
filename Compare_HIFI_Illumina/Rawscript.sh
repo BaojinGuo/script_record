@@ -83,6 +83,57 @@ module load singularity/4.1.0-nompi
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/deepvariant_latest.sif run_deepvariant --model_type WGS --ref MorexV3.fa --reads 01.bwa/'$line'_MorexV3.bwa.sort.bam --sample_name '$line' --output_vcf 1.deepvariant/'$line'.bwa.deep.vcf.gz --num_shards 128 --logging_dir 1.deepvariant/'$line'.deep.log
 ' >$line.deep.sh; done
 
+###bcftools
+ls 01.bwa/*.bam|cut -f2 -d "/"|cut -f1 -d "_"|while read line; do  echo '#!/bin/bash
+#SBATCH --job-name=bcfcall
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+module load bcftools/1.15--haf5b3da_0
+srun --export=all -n 1 -c 128 bcftools mpileup -f MorexV3.fa -Q 20 -q 20 -C 50 -Ou 2.GATK/'$line'_MorexV3.bwa.sort.dup.bam | bcftools call -mv -Oz -o 3.bcftools/'$line'.variants.vcf.gz --threads 128
+'>$line.bcfcall.sh; done
+
+##cuteSV
+ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sort.bam};mkdir -p work_dictionary/$prefix; echo '#!/bin/bash
+#SBATCH --job-name cutesv
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate cutesv
+srun --export=all -n 1 -c 128 cuteSV 01.minimap/'"$line"' MorexV3.fa 04.cuteSV/'"$prefix"'.cuteSV.vcf work_dictionary/'"$prefix"' -s 5 -S '"$prefix"' -l 50 --genotype --max_cluster_bias_INS 1000 --diff_ratio_merging_INS 0.9 --max_cluster_bias_DEL 1000 --diff_ratio_merging_DEL 0.5 -t 128' >$prefix.cuteSV.sh; done
+
+
+
+##sniffles
+ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sort.bam}; echo '#!/bin/bash
+#SBATCH --job-name=sniffles
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=2:00:00
+#SBATCH --account=pawsey0399
+source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate sniffle
+srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.Morex.vcf --reference Morex.V3.chr.fasta --snf 02.sniffles/'"$prefix"'.Morex.snf --threads 128 --minsupport 5 --long-ins-length 100000000 --long-del-length 100000000' >$prefix.sniffle.sh ; done
+
+
+##svim
+ls 01.minimap/*.bam|cut -f2 -d"/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sort.bam}; echo '#!/bin/bash
+#SBATCH --job-name=SVIM
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate svim
+srun --export=all -n 1 -c 128 svim alignment 03.SVIM/'"$prefix"' 01.minimap/'"$line"' MorexV3.fa  --minimum_depth 5 --min_sv_size 50 --sample '"$prefix"' '>$prefix.svim.sh; done
 
 
 
