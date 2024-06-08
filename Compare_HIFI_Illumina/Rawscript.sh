@@ -55,7 +55,33 @@ seqkit sample -p $partition -j 16 -s 11 Vlamingh_clean_1.fq.gz|gzip >1.split/Vla
 seqkit sample -p $partition -j 16 -s 11 Vlamingh_clean_2.fq.gz|gzip >1.split/Vlamingh_clean5X_2.fq.gz
 
 
+####GATK
+ls 01.bwa/*.bam|cut -f2 -d "/"|cut -f1 -d "_"|while read line; do echo '#!/bin/bash
+#SBATCH --job-name=gatk
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+module load gatk4/4.2.5.0--hdfd78af_0
+module load module load samtools/1.15--h3843a85_0                                                                                                                                           srun --export=all -n 1 -c 128 gatk --java-options "-XX:ParallelGCThreads=128" MarkDuplicates -I 01.bwa/'$line'_MorexV3.bwa.sort.bam -O 2.GATK/'$line'_MorexV3.bwa.sort.dup.bam -M 2.GATK/'$line'_MorexV3.bwa.sort.dup.metirc --REMOVE_DUPLICATES true                                                                                                                                   srun --export=all -n 1 -c 128 samtools index -@ 128 -c 2.GATK/'$line'_MorexV3.bwa.sort.dup.bam
+srun --export=all -n 1 -c 128 gatk --java-options "-XX:ParallelGCThreads=128" HaplotypeCaller -OVI False -R MorexV3.fa -I 2.GATK/'$line'_MorexV3.bwa.sort.dup.bam -O 2.GATK/'$line'_MorexV3.bwa.vcf --native-pair-hmm-threads 128
+' >$line.gatk.sh; done
 
+
+####DeepVariant
+ls 01.bwa/*.bam|cut -f2 -d "/"|cut -f1 -d "_"|while read line; do  echo '#!/bin/bash
+#SBATCH --job-name=Deepvariant
+#SBATCH --partition=highmem
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=96:00:00
+#SBATCH --account=pawsey0399
+module load singularity/4.1.0-nompi
+srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/deepvariant_latest.sif run_deepvariant --model_type WGS --ref MorexV3.fa --reads 01.bwa/'$line'_MorexV3.bwa.sort.bam --sample_name '$line' --output_vcf 1.deepvariant/'$line'.bwa.deep.vcf.gz --num_shards 128 --logging_dir 1.deepvariant/'$line'.deep.log
+' >$line.deep.sh; done
 
 
 
