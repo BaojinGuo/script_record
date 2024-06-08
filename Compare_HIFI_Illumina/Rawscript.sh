@@ -120,7 +120,7 @@ ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$lin
 #SBATCH --time=2:00:00
 #SBATCH --account=pawsey0399
 source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate sniffle
-srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.Morex.vcf --reference Morex.V3.chr.fasta --snf 02.sniffles/'"$prefix"'.Morex.snf --threads 128 --minsupport 5 --long-ins-length 100000000 --long-del-length 100000000' >$prefix.sniffle.sh ; done
+srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.Morex.vcf --reference MorexV3.fa --snf 02.sniffles/'"$prefix"'.Morex.snf --threads 128 --minsupport 5 --long-ins-length 100000000 --long-del-length 100000000' >$prefix.sniffle.sh ; done
 
 
 ##svim
@@ -163,5 +163,26 @@ ls 1.split/*.fastq.gz|cut -f2 -d"/"|cut -f1 -d "."|while read line; do echo '#!/
 module load singularity/4.1.0-nompi
 module load samtools/1.15--h3843a85_0
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/minimap2.sif minimap2 -ax map-hifi -c --MD -R '"'@RG\tID:"$line"\tSM:"$line"'"' -I100g -t 128 -Y MorexV3.fa 1.split/'"$line"'.fastq.gz |samtools sort -@ 128 -O BAM -o 01.minimap/'"$line"'.Morex.sort.bam' >$line.mini.sh; done
+
+
+
+####sr: minimap + sniffle + deepvariant
+ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sr.sort.bam}; echo '#!/bin/bash
+#SBATCH --job-name=sniffles
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=128
+#SBATCH --time=2:00:00
+#SBATCH --account=pawsey0399
+source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate sniffle
+srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.sr.Morex.vcf --reference MorexV3.fa --snf 02.sniffles/'"$prefix"'.sr.Morex.snf --threads 128 --minsupport 1 --long-ins-length 100000000 --long-del-length 100000000' >$prefix.sr.sniffle.sh ; done
+
+
+
+
+
+
+
 
 
