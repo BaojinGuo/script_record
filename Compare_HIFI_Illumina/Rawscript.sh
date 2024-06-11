@@ -176,7 +176,7 @@ ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$lin
 #SBATCH --time=2:00:00
 #SBATCH --account=pawsey0399
 source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate sniffle
-srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.sr.Morex.vcf --reference MorexV3.fa --snf 02.sniffles/'"$prefix"'.sr.Morex.snf --threads 128 --minsupport 1 --long-ins-length 100000000 --long-del-length 100000000' >$prefix.sr.sniffle.sh ; done
+srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.sr.Morex.vcf --reference MorexV3.fa --snf 02.sniffles/'"$prefix"'.sr.Morex.snf --threads 128 --minsupport 1 --long-ins-length 100000 --long-del-length 100000' >$prefix.sr.sniffle.sh ; done
 
 ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sr.sort.bam}; echo '#!/bin/bash
 #SBATCH --job-name=Deepvariant
@@ -199,7 +199,7 @@ ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$lin
 #SBATCH --time=2:00:00
 #SBATCH --account=pawsey0399
 source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate sniffle
-srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.lr.Morex.vcf --reference MorexV3.fa --snf 02.sniffles/'"$prefix"'.lr.Morex.snf --threads 128 --minsupport 1 --long-ins-length 100000000 --long-del-length 100000000' >$prefix.lr.sniffle.sh ; done
+srun --export=all -n 1 -c 128 sniffles --input 01.minimap/'"$line"' --vcf 02.sniffles/'"$prefix"'.lr.Morex.vcf --reference MorexV3.fa --snf 02.sniffles/'"$prefix"'.lr.Morex.snf --threads 128 --minsupport 1 --long-ins-length 100000 --long-del-length 100000' >$prefix.lr.sniffle.sh ; done
 
 
 ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$line"); prefix=${filename%.Morex.sort.bam}; echo '#!/bin/bash
@@ -213,7 +213,26 @@ ls 01.minimap/*.bam|cut -f2 -d "/"|while read line; do filename=$(basename "$lin
 module load singularity/4.1.0-nompi
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/deepvariant_latest.sif run_deepvariant --model_type PACBIO --ref MorexV3.fa --reads 01.minimap/'$line' --sample_name '$prefix'_lr --output_vcf 03.Deepvariant/'$prefix'.lr.mini.deep.vcf.gz --num_shards 128 --logging_dir 03.Deepvariant/'$prefix'.lr.deep.log' >$prefix.lr.deep.sh; don
 
+###subset homologous allels and filer by SVtype and length
+ls *.sh|cut -f1 -d '.'|sort|uniq|while read line; do awk 'BEGIN {OFS="\t"} /^#/ || ($0 ~ /1\/1/) {print}' 02.sniffles/${line}.Morex.vcf >05.SURVIVOR/${line}/${line}.sniffles.hom.vcf; done
+ls *.sh|cut -f1 -d '.'|sort|uniq|while read line; do awk 'BEGIN {OFS="\t"} /^#/ || ($0 ~ /1\/1/) {print}' 04.cuteSV/${line}.cuteSV.vcf >05.SURVIVOR/${line}/${line}.cuteSV.hom.vcf; done
+ls *.sh|cut -f1 -d '.'|sort|uniq|while read line; do awk 'BEGIN {OFS="\t"} /^#/ || ($0 ~ /1\/1/) {print}' 03.SVIM/${line}/variants.vcf >05.SURVIVOR/${line}/${line}.SVIM.hom.vcf; done
+ls|awk 'NR==1 || NR==2 || NR==3 || NR==4 || NR==9 {print$0}'|while read line; do python SVvcf.filter.py $line/$line.cuteSV.hom.vcf $line/$line.cuteSV.final.vcf; done
+ls|awk 'NR==1 || NR==2 || NR==3 || NR==4 || NR==9 {print$0}'|while read line; do python SVvcf.filter.py $line/$line.SVIM.hom.vcf $line/$line.SVIM.final.vcf; done
+ls|awk 'NR==1 || NR==2 || NR==3 || NR==4 || NR==9 {print$0}'|while read line; do python SVvcf.filter.py $line/$line.sniffles.hom.vcf $line/$line.sniffles.final.vcf; done
+
+###merge all call set (2/3) to one merged file using SURVIVOR
+ls *.vcf >samplefile
+ls |while read line; do cd $line; SURVIVOR merge samplefile 50 2 1 1 0 50 ${line}.SURVIVOR.homo.vcf; cd ..; done
+###delete TRA, only retain INS DEL INV DUP
+ls |while read line; do cd $line; grep -v '=TRA;' ${line}.SURVIVOR.homo.vcf >${line}.SURVIVOR.final.vcf; cd ..; done
 
 
+
+####summary and statistics vcf per sample
+python summary_noheader_common.py
+ls *.vcf|cut -f1 -d'.'|while read line; do python summary_noheader_common.py ${line}.SURVIVOR.final.vcf 01.Summary/${line}.summary; done
+python statistics.py
+ls *.vcf|cut -f1 -d'.'|while read line; do  python statistics.py 01.Summary/${line}.summary 01.Summary/${line}.total 01.Summary/${line}.chr 01.Summary/${line}.len; done
 
 
