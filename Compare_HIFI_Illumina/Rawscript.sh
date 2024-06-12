@@ -230,9 +230,9 @@ ls |while read line; do cd $line; grep -v '=TRA;' ${line}.SURVIVOR.homo.vcf >${l
 
 
 ####summary and statistics vcf per sample
-python summary_noheader_common.py
-ls *.vcf|cut -f1 -d'.'|while read line; do python summary_noheader_common.py ${line}.SURVIVOR.final.vcf 01.Summary/${line}.summary; done
-python statistics.py
-ls *.vcf|cut -f1 -d'.'|while read line; do  python statistics.py 01.Summary/${line}.summary 01.Summary/${line}.total 01.Summary/${line}.chr 01.Summary/${line}.len; done
+python 01.extract_SV_info.py
+ls *.vcf|cut -f1 -d'.'|while read line; do python 01.extract_SV_info.py ${line}.SURVIVOR.final.vcf 01.Summary/${line}.summary; done
+python 02.statistics.py
+ls *.vcf|cut -f1 -d'.'|while read line; do  python 02.statistics.py 01.Summary/${line}.summary 01.Summary/${line}.total 01.Summary/${line}.chr 01.Summary/${line}.len; done
 
 
