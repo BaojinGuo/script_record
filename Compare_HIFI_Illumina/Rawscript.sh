@@ -226,7 +226,7 @@ ls *.vcf >samplefile
 ls |while read line; do cd $line; SURVIVOR merge samplefile 50 2 1 1 0 50 ${line}.SURVIVOR.homo.vcf; cd ..; done
 ###delete TRA, only retain INS DEL INV DUP
 ls |while read line; do cd $line; grep -v '=TRA;' ${line}.SURVIVOR.homo.vcf >${line}.SURVIVOR.final.vcf; cd ..; done
-
+#due to the parametor'SV max length'of SV callers, so here i have to filter SV length , if the parametor is correct , just using this command, if wrong, using script SVvcf.filter.py
 
 
 ####summary and statistics vcf per sample
