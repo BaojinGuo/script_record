@@ -83,6 +83,9 @@ def filter_sv(input_vcf, output_vcf):
                                     new_info.append(field)
                             fields[7] = ';'.join(new_info)
                             
+                            # Add SVLEN to INFO field
+                            fields[7] += f';SVLEN={svlen}'
+
                             # Write the modified line to the output VCF file
                             f_output.write('\t'.join(fields) + '\n')
     except Exception as e:
