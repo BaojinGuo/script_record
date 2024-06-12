@@ -1,3 +1,4 @@
+###raw name: summary_noheader_common.py
 ###Usage: python script.py input.vcf output.summary
 import sys
 
