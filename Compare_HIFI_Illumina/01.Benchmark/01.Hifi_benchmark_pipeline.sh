@@ -57,9 +57,9 @@ ls *.sh|cut -f1 -d '.'|sort|uniq|while read line; do awk 'BEGIN {OFS="\t"} /^#/ 
 ls *.sh|cut -f1 -d '.'|sort|uniq|while read line; do awk 'BEGIN {OFS="\t"} /^#/ || ($0 ~ /1\/1/) {print}' 04.cuteSV/${line}.cuteSV.vcf >05.SURVIVOR/${line}/${line}.cuteSV.hom.vcf; done
 ls *.sh|cut -f1 -d '.'|sort|uniq|while read line; do awk 'BEGIN {OFS="\t"} /^#/ || ($0 ~ /1\/1/) {print}' 03.SVIM/${line}/variants.vcf >05.SURVIVOR/${line}/${line}.SVIM.hom.vcf; done
 
-ls|awk 'NR==1 || NR==2 || NR==3 || NR==4 || NR==9 {print$0}'|while read line; do python SVvcf.filter.py $line/$line.cuteSV.hom.vcf $line/$line.cuteSV.final.vcf; done
-ls|awk 'NR==1 || NR==2 || NR==3 || NR==4 || NR==9 {print$0}'|while read line; do python SVvcf.filter.py $line/$line.SVIM.hom.vcf $line/$line.SVIM.final.vcf; done
-ls|awk 'NR==1 || NR==2 || NR==3 || NR==4 || NR==9 {print$0}'|while read line; do python SVvcf.filter.py $line/$line.sniffles.hom.vcf $line/$line.sniffles.final.vcf; done
+ls|awk 'NR==1 || NR==2 || NR==3 || NR==4 || NR==9 {print$0}'|while read line; do python 00.SVvcf.filter.py $line/$line.cuteSV.hom.vcf $line/$line.cuteSV.final.vcf; done
+ls|awk 'NR==1 || NR==2 || NR==3 || NR==4 || NR==9 {print$0}'|while read line; do python 00.SVvcf.filter.py $line/$line.SVIM.hom.vcf $line/$line.SVIM.final.vcf; done
+ls|awk 'NR==1 || NR==2 || NR==3 || NR==4 || NR==9 {print$0}'|while read line; do python 00.SVvcf.filter.py $line/$line.sniffles.hom.vcf $line/$line.sniffles.final.vcf; done
 
 ###third step, detect union sites with SURVIVOR with parameters '50 2 1 1 0 50' which means the sites will be exist if 2 of 3 callers get 
 ls *.vcf >samplefile
