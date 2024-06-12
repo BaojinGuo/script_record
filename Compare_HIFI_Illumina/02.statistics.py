@@ -1,3 +1,4 @@
+###raw name: statistics.py
 ###Usage: python script.py input.txt SVtype_total_number.txt SV_per_chr.txt SV_len.txt
 
 import sys
