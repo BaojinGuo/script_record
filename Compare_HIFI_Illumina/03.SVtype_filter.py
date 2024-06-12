@@ -1,3 +1,11 @@
+# This script filters a Variant Call Format (VCF) file to include only specific types of Structural Variants (SVs)
+# within certain length ranges. It parses a VCF file, identifies SVs, checks their types and lengths, and outputs a
+# filtered VCF file containing only the desired SV types with lengths within a specified range.
+#
+# Usage:
+# python script.py input_vcf output_vcf
+#
+# Where `input_vcf` is the path to the input VCF file and `output_vcf` is the path to the output filtered VCF file.
 import argparse
 import sys
 
@@ -33,6 +41,7 @@ def filter_sv(input_vcf, output_vcf):
                     info_fields = fields[7].split(';')
                     svtype = None
                     svlen = None
+                    end = None
                     for field in info_fields:
                         parts = field.split('=')
                         if len(parts) == 2:
@@ -41,17 +50,41 @@ def filter_sv(input_vcf, output_vcf):
                                 svtype = value
                             elif key == 'SVLEN':
                                 svlen = int(value)
+                            elif key == 'END':
+                                end = int(value)
 
-                    # Check if SV type and SV length were found
-                    if svtype is None or svlen is None:
-                        print(f"Warning: Line {line_num} does not contain SVTYPE or SVLEN in the INFO field.")
+                    # Check if SV type was found
+                    if svtype is None:
+                        print(f"Warning: Line {line_num} does not contain SVTYPE in the INFO field.")
                         continue
 
-                    # Check if SV type is INS, DEL, INV, or DUP
-                    if svtype in ['INS', 'DEL', 'INV', 'DUP']:
+                    # If SV length is not found, calculate it from END and the position field
+                    if svlen is None:
+                        if end is not None:
+                            svlen = end - int(fields[1])
+                        else:
+                            print(f"Warning: Line {line_num} does not contain SVLEN or END in the INFO field.")
+                            continue
+
+                    # Check if SV type is INS, DEL, INV, or DUP (including DUP:*)
+                    if svtype in ['INS', 'DEL', 'INV'] or svtype.startswith('DUP'):
+                        # Normalize DUP types
+                        if svtype.startswith('DUP'):
+                            svtype = 'DUP'
+
                         # Check if SV length is within the specified range
                         if -100000 < svlen < 100000:
-                            f_output.write(line)
+                            # Modify the INFO field to reflect the normalized SVTYPE
+                            new_info = []
+                            for field in info_fields:
+                                if field.startswith('SVTYPE='):
+                                    new_info.append(f'SVTYPE={svtype}')
+                                else:
+                                    new_info.append(field)
+                            fields[7] = ';'.join(new_info)
+                            
+                            # Write the modified line to the output VCF file
+                            f_output.write('\t'.join(fields) + '\n')
     except Exception as e:
         print("Error:", e)
         sys.exit(1)
@@ -65,5 +98,3 @@ if __name__ == "__main__":
 
     # Run the filtering function
     filter_sv(args.input_vcf, args.output_vcf)
-
-                                                        
