@@ -1,6 +1,6 @@
-
-
-
+library(ggplot2)
+library(RColorBrewer)
+library(patchwork)
 # 设置文件名和颜色
 file_names <- c("Hockett.summary", "RGT.summary", "OUN333.summary", "Vlamingh.summary", "Igri.summary")
 colors <- brewer.pal(n = 5, name = "Set3")
