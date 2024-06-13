@@ -1,5 +1,5 @@
 ###this is for SV benchmark
-###samples:RGT_Planet(cultivar, UK) Igri(cultivar, Germany) OUN333(landrace, Nepal) Vlaminagh(cultivar, Austrilian) Hockett(cultivar, USA)
+###samples:RGT_Planet(cultivar, UK) Igri(cultivar, Germany) OUN333(landrace, Nepal) Vlaminagh(cultivar, Austrilian) Hockett(cultivar, USA), 20X HIFI reads
 ##first step, run pipeline of each SV callers (sniffles SVIM cuteSV)
 ls *.fastq.gz|while read line; do filename=$(basename "$line"); prefix=${filename%.fastq.gz}; echo '#!/bin/bash
 #SBATCH --job-name=Mini
