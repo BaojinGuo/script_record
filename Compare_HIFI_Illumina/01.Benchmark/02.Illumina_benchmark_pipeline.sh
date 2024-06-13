@@ -59,7 +59,7 @@ module load singularity/4.1.0-nompi
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/deepvariant_latest.sif run_deepvariant --model_type WGS --ref MorexV3.fa --reads 01.bwa/'$line'_MorexV3.bwa.sort.bam --sample_name '$line' --output_vcf 1.deepvariant/'$line'.bwa.deep.vcf.gz --num_shards 128 --logging_dir 1.deepvariant/'$line'.deep.log
 ' >$line.deep.sh; done
 
-
+####bcftools
 ls 01.bwa/*.bam|cut -f2 -d "/"|cut -f1 -d "_"|while read line; do  echo '#!/bin/bash
 #SBATCH --job-name=bcfcall
 #SBATCH --partition=work
@@ -73,10 +73,26 @@ srun --export=all -n 1 -c 128 bcftools mpileup -f MorexV3.fa -Q 20 -q 20 -C 50 -
 '>$line.bcfcall.sh; done
 
 
+######filter raw variants
+###deepvariants
+ls *.bwa.deep.vcf.gz|tail -n4|cut -f1 -d"."|while read line; do bcftools view -f PASS $line.bwa.deep.vcf.gz -Oz -o $line.bwa.deep.pass.vcf.gz; done 
+ls *pass.vcf.gz|while read line; do tabix -C $line; done
 
+###GATK
+ls *.bwa.vcf |cut -f1 -d "."|cut -f1 -d "_"|while read line; do srun -c 128 -n 1 -p debug -A pawsey0399 gatk SelectVariants -R ../../MorexV3.fa -V ${line}_MorexV3.bwa.vcf --select-type-to-include SNP -O ${line}_MorexV3.bwa.snp.vcf; done
+ls *.bwa.vcf |cut -f1 -d "."|cut -f1 -d "_"|while read line; do srun -c 128 -n 1 -p debug -A pawsey0399 gatk SelectVariants -R ../../MorexV3.fa -V ${line}_MorexV3.bwa.vcf --select-type-to-include INDEL -O ${line}_MorexV3.bwa.indel.vcf; done
 
+gatk VariantFiltration \
+    -V ../output/E.coli/E_coli_K12.indel.vcf.gz \
+    --filter-expression "QD < 2.0 || FS > 200.0 || SOR > 10.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0||DP<10||QUAL<50" \
+    --filter-name "Filter" \
+    -O ../output/E.coli/E_coli_K12.indel.filter.vcf.gz
 
-
+gatk VariantFiltration \
+    -V ../output/E.coli/E_coli_K12.snp.vcf.gz \
+    --filter-expression "QD < 2.0 || MQ < 40.0 || FS > 60.0 || SOR > 3.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0||DP<10||QUAL<50" \
+    --filter-name "Filter" \
+    -O ../output/E.coli/E_coli_K12.snp.filter.vcf.gz
 
 
 
