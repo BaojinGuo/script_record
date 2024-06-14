@@ -126,7 +126,21 @@ ls *PASS.vcf|cut -f1 -d "."|while read line;do bcftools view -i 'GT="1/1"' -s $l
 
 ##########################
 ####step2 find the variants exist in 2 of 3 callers
+ls *.PASS.hom.vcf|cut -f1 -d"."|sort|uniq|while read line; do bcftools sort -Oz -o $line.bcf.PASS.hom.sort.vcf.gz $line.bcf.PASS.hom.vcf; done 
+ls *.PASS.hom.vcf|cut -f1 -d"."|sort|uniq|while read line; do bcftools sort -Oz -o $line.GATK.PASS.hom.sort.vcf.gz $line.GATK.PASS.hom.vcf; done 
+ls *.PASS.hom.vcf|cut -f1 -d"."|sort|uniq|while read line; do bcftools sort -Oz -o $line.deep.PASS.hom.sort.vcf.gz $line.deep.PASS.hom.vcf; done 
+ls *vcf.gz|while read line; do tabix -C $line;done
+
+ls *.PASS.hom.vcf|cut -f1 -d"."|sort|uniq|while read line; do bcftools merge -m none -Ov -o $line.merge.vcf $line.bcf.PASS.hom.sort.vcf.gz $line.deep.PASS.hom.sort.vcf.gz $line.GATK.PASS.hom.sort.vcf.gz --force-samples
+
+ls *merge.vcf|cut -f1 -d"."|while read line; do bcftools view -i 'COUNT(GT!="./.")>=2' -Ov -o $line.benchmark.vcf $line.merge.vcf ;  done
 
 
-
+ls *merge.vcf|cut -f1 -d"."|while read line; do 
+awk 'BEGIN {OFS="\t"} !/^#/ {
+    split($10, sample1, ":");
+    split($11, sample2, ":");
+    split($12, sample3, ":");
+    print $1, $2, $4, $5, sample1[1], sample2[1], sample3[1];
+    }' $line.merge.vcf >$line.merge.simplify.txt
 
