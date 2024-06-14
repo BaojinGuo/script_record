@@ -82,17 +82,38 @@ ls *pass.vcf.gz|while read line; do tabix -C $line; done
 ls *.bwa.vcf |cut -f1 -d "."|cut -f1 -d "_"|while read line; do srun -c 128 -n 1 -p debug -A pawsey0399 gatk SelectVariants -R ../../MorexV3.fa -V ${line}_MorexV3.bwa.vcf --select-type-to-include SNP -O ${line}_MorexV3.bwa.snp.vcf; done
 ls *.bwa.vcf |cut -f1 -d "."|cut -f1 -d "_"|while read line; do srun -c 128 -n 1 -p debug -A pawsey0399 gatk SelectVariants -R ../../MorexV3.fa -V ${line}_MorexV3.bwa.vcf --select-type-to-include INDEL -O ${line}_MorexV3.bwa.indel.vcf; done
 
-gatk VariantFiltration \
-    -V ../output/E.coli/E_coli_K12.indel.vcf.gz \
-    --filter-expression "QD < 2.0 || FS > 200.0 || SOR > 10.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0||DP<10||QUAL<50" \
-    --filter-name "Filter" \
-    -O ../output/E.coli/E_coli_K12.indel.filter.vcf.gz
+ls *.indel.vcf|cut -f1 -d"_"|while read line; do gatk VariantFiltration -V ${line}_MorexV3.bwa.indel.vcf --filter-expression "QD < 2.0 || FS > 200.0 || SOR > 10.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0||DP<10||QUAL<50" --filter-name "Filter" -O ${line}_MorexV3.bwa.indel.filter.vcf; done
+ls *.snp.vcf|cut -f1 -d"_"|while read line; do gatk VariantFiltration -V ${line}_MorexV3.bwa.snp.vcf --filter-expression "QD < 2.0 || MQ < 40.0 || FS > 60.0 || SOR > 3.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0||DP<10||QUAL<50" --filter-name "Filter" -O ${line}_MorexV3.bwa.snp.filter.vcf; done
 
-gatk VariantFiltration \
-    -V ../output/E.coli/E_coli_K12.snp.vcf.gz \
-    --filter-expression "QD < 2.0 || MQ < 40.0 || FS > 60.0 || SOR > 3.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0||DP<10||QUAL<50" \
-    --filter-name "Filter" \
-    -O ../output/E.coli/E_coli_K12.snp.filter.vcf.gz
+ls *.indel.vcf|cut -f1 -d"_"|while read line; do bcftools view -f PASS ${line}_MorexV3.bwa.indel.filter.vcf -Oz -o ${line}_MorexV3.bwa.indel.PASS.vcf.gz; done
+ls *.snp.vcf|cut -f1 -d"_"|while read line; do bcftools view -f PASS ${line}_MorexV3.bwa.snp.filter.vcf -Oz -o ${line}_MorexV3.bwa.snp.PASS.vcf.gz; done
+
+ls *PASS.vcf.gz|while read line; do tabix -C $line; done
+
+ls *snp.PASS.vcf.gz|cut -f1 -d"_"|while read line; do gatk MergeVcfs -I ${line}_MorexV3.bwa.snp.PASS.vcf.gz -I ${line}_MorexV3.bwa.indel.PASS.vcf.gz -O ${line}_MorexV3.bwa.all.PASS.vcf; done
+
+#####bcftools
+snp filter rules:
+"QUAL < 50 || DP>2*$DP|| MQBZ < -(3.5+4*DP/QUAL) || RPBZ > (3+3*DP/QUAL) || RPBZ < -(3+3*DP/QUAL) || FORMAT/SP > (40+DP/2) || SCBZ > (2.5+DP/30)"
+
+"QUAL < 50 || DP < 10 || DP > 90 || MQBZ < -4.3 || RPBZ > 3.6 || RPBZ < -3.6 || SCBZ > 2.88 || MQ < 40"
+indel filter rules
+"QUAL < 50 || DP < 10 || DP > 90 ||IDV < 2 || IMF < 0.02+(($qual+1)/($qual+31))*(($qual+1)/($qual+31))/4 || DP > ($DP/2) * (1.7 + 12/($qual+20)) || MQBZ < -(5+DP/20) || RPBZ+SCBZ > 9"
+
+"QUAL < 50 || DP < 10 || DP > 40 ||IDV < 2 || IMF < 0.12 || MQ < 40 || MQBZ < -5.5 || RPBZ+SCBZ > 9"
+
+
+ls *.variants.vcf.gz|cut -f1 -d"."|while read line; do bcftools view -i 'TYPE="INDEL"' $line.variants.vcf.gz -Oz -o $line.indel.vcf.gz; done
+ls *indel.vcf.gz|while read line; do tabix -C $line; done
+
+ls *.variants.vcf.gz|cut -f1 -d"."|tail -n4|while read line; do bcftools view -e 'TYPE="INDEL"' $line.variants.vcf.gz -Oz -o $line.snp.vcf.gz; done
+ls *snp.vcf.gz|while read line; do tabix -C $line; done
+
+ls *indel.vcf.gz|cut -f1 -d "."|while read line; do bcftools view -e "QUAL < 50 || DP < 10 || DP > 40 ||IDV < 2 || IMF < 0.12 || MQ < 40 || MQBZ < -5.5 || RPBZ+SCBZ > 9" -Oz -o $line.indel.PASS.vcf.gz $line.indel.vcf.gz
+ls *snp.vcf.gz|cut -f1 -d "."|while read line; do bcftools view -e "QUAL < 50 || DP < 10 || DP > 90 || MQBZ < -4.3 || RPBZ > 3.6 || RPBZ < -3.6 || SCBZ > 2.88 || MQ < 40" -Oz -o $line.snp.PASS.vcf.gz $line.snp.vcf.gz
+
+ls *.PASS.vcf.gz|while read line; do tabix -C $line; done
+
 
 
 
