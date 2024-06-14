@@ -77,6 +77,8 @@ srun --export=all -n 1 -c 128 bcftools mpileup -f MorexV3.fa -Q 20 -q 20 -C 50 -
 ###deepvariants
 ls *.bwa.deep.vcf.gz|tail -n4|cut -f1 -d"."|while read line; do bcftools view -f PASS $line.bwa.deep.vcf.gz -Oz -o $line.bwa.deep.pass.vcf.gz; done 
 ls *pass.vcf.gz|while read line; do tabix -C $line; done
+ls *.bwa.deep.pass.vcf.gz|cut -f1 -d"."|while read line; do bcftools view -i 'GT="1/1"' -s $line -Ov -o $line.bwa.deep.pass.hom.vcf $line.bwa.deep.pass.vcf.gz; done
+bcftools view -i 'DP>10' RGT.bwa.deep.pass.hom.vcf -Ov -o RGT.bwa.deep.PASS.hom.vcf
 
 ###GATK
 ls *.bwa.vcf |cut -f1 -d "."|cut -f1 -d "_"|while read line; do srun -c 128 -n 1 -p debug -A pawsey0399 gatk SelectVariants -R ../../MorexV3.fa -V ${line}_MorexV3.bwa.vcf --select-type-to-include SNP -O ${line}_MorexV3.bwa.snp.vcf; done
@@ -91,6 +93,10 @@ ls *.snp.vcf|cut -f1 -d"_"|while read line; do bcftools view -f PASS ${line}_Mor
 ls *PASS.vcf.gz|while read line; do tabix -C $line; done
 
 ls *snp.PASS.vcf.gz|cut -f1 -d"_"|while read line; do gatk MergeVcfs -I ${line}_MorexV3.bwa.snp.PASS.vcf.gz -I ${line}_MorexV3.bwa.indel.PASS.vcf.gz -O ${line}_MorexV3.bwa.all.PASS.vcf; done
+
+ls *_MorexV3.bwa.all.PASS.vcf|cut -f1 -d"_"|while read line; do bcftools view -i 'GT="1/1"' -s $line -Ov -o ${line}_MorexV3.bwa.all.PASS.hom.vcf ${line}_MorexV3.bwa.all.PASS.vcf; done
+
+
 
 #####bcftools
 snp filter rules:
@@ -114,6 +120,12 @@ ls *snp.vcf.gz|cut -f1 -d "."|while read line; do bcftools view -e "QUAL < 50 ||
 
 ls *.PASS.vcf.gz|while read line; do tabix -C $line; done
 
+gatk MergeVcfs -I -I -O
+
+ls *PASS.vcf|cut -f1 -d "."|while read line;do bcftools view -i 'GT="1/1"' -s $line -Ov -o $line.PASS.hom.vcf $line.PASS.vcf; done
+
+##########################
+####step2 find the variants exist in 2 of 3 callers
 
 
 
