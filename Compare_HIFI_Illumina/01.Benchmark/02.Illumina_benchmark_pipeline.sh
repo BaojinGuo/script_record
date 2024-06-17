@@ -144,3 +144,16 @@ awk 'BEGIN {OFS="\t"} !/^#/ {
     print $1, $2, $4, $5, sample1[1], sample2[1], sample3[1];
     }' $line.merge.vcf >$line.merge.simplify.txt
 
+python 03.statistics_illumina_benchmark.py Hockett.merge.simplify.txt Hockett.merge
+
+
+
+
+
+
+
+
+
+
+
+
