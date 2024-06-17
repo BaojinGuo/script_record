@@ -72,20 +72,20 @@ for (group_name in names(groups)) {
 ####illumina venn ideogram
 
 
-data<-read.delim("Hockett.merge.simplify.txt",col.names = c("Chromosome","Position","REF","ALT","bcftools","Deepvariant","GATK"))
-data$ID <- paste(data$Chromosome, data$Position, sep = "_")
+data<-read.delim("RGT.merge.simplify.txt",col.names = c("Chromosome","Position","REF","ALT","bcftools","Deepvariant","GATK"))
+data$ID <- paste(data$Chromosome, data$Position,data$REF,data$ALT, sep = "_")
 sample1_positions <- data$ID[data$bcftools != "./."]
 sample2_positions <- data$ID[data$Deepvariant != "./."]
 sample3_positions <- data$ID[data$GATK != "./."]
-sample1_set <- unique(sample1_positions)
-sample2_set <- unique(sample2_positions)
-sample3_set <- unique(sample3_positions)
-x<-list(bcftools=sample1_set,GATK=sample3_set,Deepvariant=sample2_set)
+#sample1_set <- unique(sample1_positions)
+#sample2_set <- unique(sample2_positions)
+#sample3_set <- unique(sample3_positions)
+x<-list(bcftools=sample1_positions,GATK=sample3_positions,Deepvariant=sample2_positions)
 p<-ggVennDiagram(x,label_alpha = 0,set_size = 8,label_size = 8)+
     scale_fill_distiller(palette = "Reds",direction = 1)+ 
-    ggtitle("Hockett") + 
+    ggtitle("RGT Planet") + 
     theme(plot.title = element_text(hjust = 0.5, size = 28,face = "bold"))
-ggsave("Hockett_illumina_venn_diagram.tiff", plot = p, width = 10, height = 8, dpi = 300,bg="white")
+ggsave("RGT_illumina_venn_diagram.tiff", plot = p, width = 10, height = 8, dpi = 300,bg="white")
 
 
 
