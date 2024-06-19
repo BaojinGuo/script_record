@@ -239,10 +239,17 @@ ls *.SV.benchmark.vcf|cut -f1 -d"."|while read line; do  awk '/^#/ {print; next}
 ls *.SNV.benchmark.vcf|cut -f1 -d"."|while read line; do  awk '/^#/ {print; next} {OFS="\t"; $10="1/1"; for (i=11; i<=NF; i++) $i="1/1"; print}' $line.Illumina.SNV.benchmark.vcf |bcftools view -s $line -Ov -o $line.Illumina.SNV.benchmark2.vcf; done
 
 
-
+####f1score
 ls *merge.vcf|while read line; do python ../../02.Illumina/05.F1-score/F1-score.py $line ../05.F1-score/$line.f1score; done
 ls *.merge.vcf|while read line
 do
 python ../05.F1-score/F1-score.py $line ../05.F1-score/$line.f1score
 done
+
+
+
+
+
+
+
  
