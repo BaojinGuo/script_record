@@ -4,6 +4,17 @@ library(PerformanceAnalytics)
 
 # Read the dataset from CSV file
 data <- read.csv("phenotype-cor.csv", header = TRUE)
+# head(data)
+
+#BDT21.TKW.obs.mean	MEI21.TKW.obs.mean	MER21.TKWAs.obs.mean	WHS21.TKW.obs.mean
+#53.8	46.5	47.2	44.6
+#50.7	42.7	40	42.9
+#49.9	44.1	42.5	42.9
+#53	44	47.1	46.5
+#53.2	43	47.15	46.5
+#55.8	46.8	43.2	46.6
+#NA	44.4	45.7	43.9
+#57	45.05	46	47.3
 
 # Use chart.Correlation to create a phenotypic correlation map
 chart.Correlation(data)
