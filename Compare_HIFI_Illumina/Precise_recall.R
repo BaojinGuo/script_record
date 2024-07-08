@@ -60,7 +60,7 @@ snp_data$Recall <- as.numeric(gsub("%", "", snp_data$Recall)) / 100
 snp_data$Precision <- as.numeric(gsub("%", "", snp_data$Precision)) / 100
 
 
-ggplot(snp_data, aes(x = Recall, y = Precision, color = Sample_Depth, shape = Reads_type)) +
+snp<-ggplot(snp_data, aes(x = Recall, y = Precision, color = Sample_Depth, shape = Reads_type)) +
     geom_point(size = 3) +
     geom_line(aes(group = Group), linetype = "solid") +
     scale_color_manual(values = colors, labels = function(x) gsub("_", " Depth: ", x)) +
@@ -77,4 +77,7 @@ ggplot(snp_data, aes(x = Recall, y = Precision, color = Sample_Depth, shape = Re
         legend.position = "right",
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 10)
-    ) +  xlim(0, 1) + ylim(0, 1)
+    ) +  xlim(0.5, 1) + ylim(0, 1)
+
+ggsave("SNPrecall.tiff", plot = snp, width = 10, height = 6, dpi = 300, bg = "white")
+                       
