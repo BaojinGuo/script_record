@@ -80,4 +80,17 @@ snp<-ggplot(snp_data, aes(x = Recall, y = Precision, color = Sample_Depth, shape
     ) +  xlim(0.5, 1) + ylim(0, 1)
 
 ggsave("SNPrecall.tiff", plot = snp, width = 10, height = 6, dpi = 300, bg = "white")
+
+
+
+snp_data$F.score <- as.numeric(gsub("%", "", snp_data$F.score)) / 100
+snp_data$Depth<-factor(snp_data$Depth,levels = c("5X","10X","15X"))
+snpf<-ggplot(snp_data,aes(x=Depth,y=F.score,fill=Reads_type))+geom_boxplot()+theme_minimal() +scale_fill_manual(values = brewer.pal(n = 3, name = "Set3")) +theme(text = element_text(size = 16),legend.position = "none")
+ggsave("SNPfscore.tiff", plot = snpf, width = 8, height = 6, dpi = 300, bg = "white")
+
+
+
+
+
+                       
                        
