@@ -1,10 +1,7 @@
 
 
 
-
-
-
-###SVision-pro
+###SVision-pro1.8
 ls 02.minimap/*.bam|cut -f2 -d"/"|cut -f1 -d "."|while read line; do echo '#!/bin/bash
 #SBATCH --job-name=SVisionpro
 #SBATCH --partition=work
