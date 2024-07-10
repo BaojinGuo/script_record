@@ -64,3 +64,38 @@ source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate pbsv
 srun --export=all -n 1 -c 128 pbsv discover --hifi -s '"$prefix"' -y 97 02.minimap/'"$line"' 03.pbsv/'"$prefix"'.svsig.gz
 srun --export=all -n 1 -c 128 pbsv call --hifi -m 50 --max-ins-length 100000 --max-dup-length 100000 -O 3 --min-N-in-gap 1000 --filter-near-reference-gap 0 MorexV3.fa 03.pbsv/'"$prefix"'.svsig.gz 03.pbsv/'"$prefix"'.pbsv.vcf'>$prefix.pbsv.sh 
 done
+
+###hom & filter
+ls *.vcf |cut -f1 -d "."|while read line; do awk 'BEGIN {OFS="\t"} /^#/ || ($0 ~ /1\/1/) {print}' ${line}.cuteSV.vcf > ${line}.cuteSV.hom.vcf; done
+ls *.vcf |cut -f1 -d "."|while read line; do awk 'BEGIN {OFS="\t"} /^#/ || ($0 ~ /1\/1/) {print}' ${line}.SVisionPro.vcf > ${line}.SVisionPro.hom.vcf; done
+ls *.vcf |cut -f1 -d "."|while read line; do awk 'BEGIN {OFS="\t"} /^#/ || ($0 ~ /1\/1/) {print}' ${line}.pbsv.vcf > ${line}.pbsv.hom.vcf; done
+ls *.vcf |cut -f1 -d "."|while read line; do awk 'BEGIN {OFS="\t"} /^#/ || ($0 ~ /1\/1/) {print}' ${line}.SVIM.vcf > ${line}.SVIM.hom.vcf; done
+ls *.vcf |cut -f1 -d "."|while read line; do awk 'BEGIN {OFS="\t"} /^#/ || ($0 ~ /1\/1/) {print}' ${line}.sniffle.vcf > ${line}.sniffle.hom.vcf; done
+
+##retain INS DEL INV DUP, modify to consistent format
+ls *hom.vcf|while read line; do filename=$(basename "$line"); prefix=${filename%.hom.vcf}; python 00.SVvcf.filter.py $line ../Process-filter/${prefix}.final.vcf >${prefix}.log; done
+
+
+###SURVIVOR for each sample
+ls ../Process-filter/*.final.vcf|cut -f3 -d"/"|cut -f1 -d"."|sort|uniq|while read line; do ls ../Process-filter/${line}*.vcf >${line}.sample; done
+ls ../Process-filter/*.final.vcf|cut -f3 -d"/"|cut -f1 -d"."|sort|uniq|while read line; do SURVIVOR merge ${line}.sample 50 3 1 1 0 50 ${line}.SURVIVOR.vcf; done
+
+###modify the results of 5 software per vcf to consistent genotype 1/1
+ls *.vcf|while read line; do filename=$(basename "$line"); prefix=${filename%.SURVIVOR.vcf}; awk 'BEGIN {OFS="\t"} 
+     /^##/ {print; next} 
+     /^#/ {print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10; next} 
+     {$9="GT"; $10 = "1/1"; print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 }' $line >${prefix}.SURVIVOR.concise.vcf; done
+
+
+###merge and get SV genotype of 103 samples 
+ls *concise.vcf >sample.file
+SURVIVOR merge sample.file 50 1 1 1 0 50 103sample.SURVIVOR.vcf
+
+
+
+
+
+
+
+
+
