@@ -91,10 +91,32 @@ ls *.vcf|while read line; do filename=$(basename "$line"); prefix=${filename%.SU
 ls *concise.vcf >sample.file
 SURVIVOR merge sample.file 50 1 1 1 0 50 103sample.SURVIVOR.vcf
 
-
-
-
-
+###5% missing, delete the number of '1/1' below 7 equal to maf 5%
+vcftools --vcf 103sample.SURVIVOR.vcf --recode-INFO-all --max-missing 0.05 --recode --out 103sample.SURVIVOR.5%
+###only retain genotyoe, and submit startwith './.' to '0/0', startwith '1/1' to '1/1'
+awk 'BEGIN {OFS="\t"} 
+     /^##/ {print; next} 
+     /^#/ {print; next} 
+     {
+         $9 = "GT";
+         for (i = 10; i <= NF; i++) {
+             if ($i ~ /^\.\//) {
+                 $i = "0/0";
+             } else if ($i ~ /^1\/1/) {
+                 $i = "1/1";
+             }
+         }
+         print
+     }' 103sample.SURVIVOR.5%.recode.vcf >103sample.SURVIVOR.sub.vcf
+####modify vcf to plot tree and PCA
+awk 'BEGIN {OFS="\t"} 
+     /^##/ {print; next} 
+     /^#/ {print; next} 
+     {
+         $4 = "A";
+         $5 = "T";
+         print
+     }' 103sample.SURVIVOR.sub.vcf >103sample.SURVIVOR.tree.vcf
 
 
 
