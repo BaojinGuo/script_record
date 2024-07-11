@@ -119,5 +119,11 @@ awk 'BEGIN {OFS="\t"}
      }' 103sample.SURVIVOR.sub.vcf >103sample.SURVIVOR.tree.vcf
 
 
+bash AUS_unique_sv.sh    >103sample.AUS_special_SV.vcf
+
+
+
+
+
 
 
