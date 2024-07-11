@@ -239,6 +239,10 @@ ls *.SV.benchmark.vcf|cut -f1 -d"."|while read line; do  awk '/^#/ {print; next}
 ls *.SNV.benchmark.vcf|cut -f1 -d"."|while read line; do  awk '/^#/ {print; next} {OFS="\t"; $10="1/1"; for (i=11; i<=NF; i++) $i="1/1"; print}' $line.Illumina.SNV.benchmark.vcf |bcftools view -s $line -Ov -o $line.Illumina.SNV.benchmark2.vcf; done
 
 
+#####
+bcftools view -i GT="1/1" -s Vlamingh_15X_lr -Ov --force-samples -o Vlamingh_15X.lr.mini.deep.pass.hom.vcf Vlamingh_15X.lr.mini.deep.pass.vcf.gz
+bcftools merge -m none -Ov -o Vlamingh_15X.lr.mini.deep.merge.vcf /scratch/pawsey0399/bguo1/Murdoch/04.Compare_SR_LR/01.Benchmark/03.Final_Benchmark/Vlamingh.Illumina.SNV.benchmark2.vcf.gz Vlamingh_15X.lr.mini.deep.pass.hom.vcf.gz
+
 ####f1score
 ls *merge.vcf|while read line; do python ../../02.Illumina/05.F1-score/F1-score.py $line ../05.F1-score/$line.f1score; done
 ls *.merge.vcf|while read line
