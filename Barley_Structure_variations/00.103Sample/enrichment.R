@@ -1,4 +1,4 @@
-library(ggplot)
+library(ggplot2)
 library(paletteer)
 
 data<-read.csv("AUS_special_go.csv",header = T)
