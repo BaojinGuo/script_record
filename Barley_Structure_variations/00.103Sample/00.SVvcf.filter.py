@@ -71,7 +71,7 @@ def filter_sv(input_vcf, output_vcf):
                         # Normalize DUP types
                         if svtype.startswith('DUP'):
                             svtype = 'DUP'
-                        if svtype in ['dDUP', 'tDUP']
+                        if svtype in ['dDUP', 'tDUP']:
                             svtype = 'DUP'
 
                         # Check if SV length is within the specified range
