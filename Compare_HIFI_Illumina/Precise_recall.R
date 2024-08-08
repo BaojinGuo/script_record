@@ -90,7 +90,9 @@ ggsave("SNPfscore.tiff", plot = snpf, width = 8, height = 6, dpi = 300, bg = "wh
 
 
 
-
+my_palette <- c("#1F77B480", "#1F77B489", "#1F77B492", "#1F77B49B", "#1F77B4A4", "#1F77B4AD", "#1F77B4B6" ,"#1F77B4BF", "#1F77B4C8", "#1F77B4D1", "#1F77B4DB", "#1F77B4E4", "#1F77B4ED", "#1F77B4F6", "#1F77B4FF","#FF7F0E80", "#FF7F0E89", "#FF7F0E92", "#FF7F0E9B", "#FF7F0EA4", "#FF7F0EAD", "#FF7F0EB6" ,"#FF7F0EBF", "#FF7F0EC8", "#FF7F0ED1", "#FF7F0EDB", "#FF7F0EE4", "#FF7F0EED", "#FF7F0EF6", "#FF7F0EFF", "#2CA02C80", "#2CA02C89", "#2CA02C92", "#2CA02C9B" ,"#2CA02CA4", "#2CA02CAD", "#2CA02CB6", "#2CA02CBF", "#2CA02CC8", "#2CA02CD1", "#2CA02CDB" ,"#2CA02CE4", "#2CA02CED", "#2CA02CF6", "#2CA02CFF","#D6272880", "#D6272889", "#D6272892", "#D627289B", "#D62728A4" ,"#D62728AD", "#D62728B6", "#D62728BF", "#D62728C8" ,"#D62728D1", "#D62728DB", "#D62728E4", "#D62728ED", "#D62728F6", "#D62728FF")
+sv_data$Sample_Depth <- factor(sv_data$Sample_Depth, levels = c("Hockett_1X", "Hockett_2X", "Hockett_3X","Hockett_4X", "Hockett_5X", "Hockett_6X","Hockett_7X", "Hockett_8X", "Hockett_9X","Hockett_10X", "Hockett_11X", "Hockett_12X","Hockett_13X", "Hockett_14X", "Hockett_15X","Igri_1X", "Igri_2X", "Igri_3X","Igri_4X", "Igri_5X", "Igri_6X","Igri_7X", "Igri_8X", "Igri_9X","Igri_10X", "Igri_11X", "Igri_12X","Igri_13X", "Igri_14X", "Igri_15X","OUN333_1X", "OUN333_2X", "OUN333_3X","OUN333_4X", "OUN333_5X", "OUN333_6X","OUN333_7X", "OUN333_8X", "OUN333_9X","OUN333_10X", "OUN333_11X", "OUN333_12X","OUN333_13X", "OUN333_14X", "OUN333_15X","RGT_1X", "RGT_2X", "RGT_3X","RGT_4X", "RGT_5X", "RGT_6X","RGT_7X", "RGT_8X", "RGT_9X","RGT_10X", "RGT_11X", "RGT_12X","RGT_13X", "RGT_14X", "RGT_15X"))
+sv_data$Depth <- factor(sv_data$Depth, levels = c("1X","2X","3X","4X","5X","6X","7X","8X","9X","10X","11X","12X","13X","14X","15X"))
 
                        
                        
