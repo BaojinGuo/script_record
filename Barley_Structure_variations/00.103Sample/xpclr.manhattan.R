@@ -39,6 +39,27 @@ p<-ggplot(data, aes(x = Position, y = Xpclr)) +
     facet_wrap(~ Chromosome, scales = "free_x", nrow = 1)+theme(element_text(size=16),axis.text = element_text(size=12),axis.title = element_text(size = 16))
 ggsave("Xpclr_manhattan.pdf", plot = p, width = 6, height = 6, dpi = 300, bg = "white")
 
-
-
+#########################################
+p <- ggplot(data, aes(x = Position, y = Xpclr)) +
+    geom_segment(aes(x = Position, xend = Position, y = 0, yend = Xpclr, color = Chromosome,
+                     ), alpha = 0.8) +
+    scale_color_manual(values = chromosome_colors) +
+    #scale_size_manual(values = c(0.5, 1.5)) +  # Enlarge top 1% lines
+    labs(x = NULL, y = "Xpclr") +  # Remove the plot title
+    theme_minimal() +
+    theme(
+        axis.text.x = element_blank(),  # Remove x-axis tick labels
+        axis.title.x = element_blank(), # Remove x-axis title
+        panel.grid.major.x = element_blank(),  # Remove vertical grid lines
+        panel.grid.minor.x = element_blank(),  # Remove vertical grid lines
+        legend.position = "none",  # Remove legend
+        strip.text = element_text(size = 12, face = "bold"),  # Customize facet labels
+        strip.placement = "outside",  # Place facet labels outside of the plot
+        strip.background = element_rect(fill = "white", color = "black"),  # Background color of facet labels
+        panel.spacing = unit(0.1, "lines"),  # Adjust spacing between panels
+        element_text(size=16), 
+        axis.text = element_text(size=12), 
+        axis.title = element_text(size = 16)
+    ) +
+    facet_wrap(~ Chromosome, scales = "free_x", nrow = 1)+geom_hline(yintercept = 14.89, linetype = "dashed", color = "red")
 
