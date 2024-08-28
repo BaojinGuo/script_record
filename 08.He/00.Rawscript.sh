@@ -65,6 +65,9 @@ fit2d <- cmdscale(pcdist, eig=TRUE, k=2 )
 
 plot(fit2d$points, xlab="Coordinate 1", ylab="Coordinate 2", col=rainbow(1.2*nrow(pcdist)) )
 
+ Rscript run_on_barley.R -t bp -s 1000000 -o barley_pca_results
+
+#############FastEPRR
 
 
 
