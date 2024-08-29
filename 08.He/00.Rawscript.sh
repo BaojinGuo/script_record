@@ -67,9 +67,11 @@ plot(fit2d$points, xlab="Coordinate 1", ylab="Coordinate 2", col=rainbow(1.2*nro
 
  Rscript run_on_barley.R -t bp -s 1000000 -o barley_pca_results
 
-#############FastEPRR
+#############FastEPRR, if you want to change windowsize or sliding window, plz change script, due to the second parameter is unavailable now.
+###first, you must phase the vcf files using beagles
+java -Xmx980G -jar /scratch/pawsey0399/bguo1/software/miniconda/envs/beagle/share/beagle-5.4_27May24.118-0/beagle.jar gt=WGRS_Clipper.1H.AUS.DP10.snps.vcf.gz out=Phased.WGRS_Clipper.1H.AUS.DP10.snps nthreads=128
 
-
+Rscript FASTEPRR.R FastEPRR_input/Phased.WGRS_Clipper. 1000000 7
 
 
 
