@@ -50,21 +50,21 @@ for (chr in chromosomes) {
     # 图 1: Position vs MDS1
     p1 <- ggplot(chr_data, aes(x = Position, y = MDS1)) +
         geom_point(size=0.5) +
-        labs(title = paste(chr),
-             x = "Position (Mb)", y = "MDS1") +
-        theme_minimal()+ylim(-0.85,0.35)
+        labs(title = "",
+             x = paste(chr, " (Mb)"), y = "") +
+        theme_minimal()+ylim(-1,0.4)+xlim(0,650)
     p1_list[[chr]] <- p1
     # 图 2: Position vs MDS2
     p2 <- ggplot(chr_data, aes(x = Position, y = MDS2)) +
         geom_point(size=0.5) +
-        labs(title = paste(chr),
-             x = "Position (Mb)", y = "MDS2") +
-        theme_minimal()+ylim(-0.65,0.45)
+        labs(title = "",
+             x = paste(chr," (Mb)"), y = "") +
+        theme_minimal()+ylim(-0.8,0.6)+xlim(0,650)
     p2_list[[chr]] <- p2
 }
 
 p1_combined <- marrangeGrob(grobs = p1_list, ncol = 1, nrow = 7, top = "Position vs MDS1")
 p2_combined <- marrangeGrob(grobs = p2_list, ncol = 1, nrow = 7, top = "Position vs MDS2")
-ggsave("Combined_Position_vs_MDS1.pdf", p1_combined, width = 10, height = 12, units = "in")
-ggsave("Combined_Position_vs_MDS2.pdf", p2_combined, width = 10, height = 12, units = "in")
+ggsave("Combined_Position_vs_MDS1.pdf", p1_combined, width = 10, height = 12, dpi=300)
+ggsave("Combined_Position_vs_MDS2.pdf", p2_combined, width = 10, height = 12, dpi=300)
 
