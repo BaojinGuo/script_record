@@ -68,3 +68,48 @@ p2_combined <- marrangeGrob(grobs = p2_list, ncol = 1, nrow = 7, top = "Position
 ggsave("Combined_Position_vs_MDS1.pdf", p1_combined, width = 10, height = 12, dpi=300)
 ggsave("Combined_Position_vs_MDS2.pdf", p2_combined, width = 10, height = 12, dpi=300)
 
+###################################################################################################
+##FASTEPRR Rho value plot
+# Load necessary libraries
+library(ggplot2)
+library(gridExtra)
+
+# Define the folder path where the files are stored
+folder_path <- "path/to/your/files/"
+
+
+# File names and corresponding chromosome labels
+files <- list("chrchr1H.txt", "chrchr2H.txt", "chrchr3H.txt", "chrchr4H.txt", 
+              "chrchr5H.txt", "chrchr6H.txt", "chrchr7H.txt")
+chr_names <- c("1H", "2H", "3H", "4H", "5H", "6H", "7H")
+
+plot_rho <- function(file, chr_name) {
+    # Construct the full file path
+    file_path <- paste0(folder_path, file)
+    
+    # Read the file
+    data <- read.table(file_path, header = TRUE)
+    
+    # Create position by taking the midpoint of the Start and End, and convert to Mb
+    data$Position <- (data$Start + data$End) / 2 / 1000000  # Convert to Mb
+    
+    # Create the plot
+    p <- ggplot(data, aes(x = Position, y = Rho)) +
+        geom_point(size=0.5) +
+        theme_minimal() +
+        xlab(paste(chr_name, "(Mb)")) +  # Update the x-axis label
+        ylab("Rho") +xlim(0,680)+ylim(0,650)
+        theme(plot.title = element_blank())  # Correctly remove the plot title
+    
+    return(p)
+}
+
+
+
+plots <- lapply(1:7, function(i) plot_rho(files[i], chr_names[i]))
+
+# Arrange the plots in one row with 7 columns
+grid.arrange(grobs = plots, ncol = 1)
+
+ggsave("rho_plots_mb.pdf", grid.arrange(grobs = plots, ncol = 1), width = 10, height = 12,dpi=300)
+
