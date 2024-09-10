@@ -8,7 +8,7 @@ library(scales)
 file_name <- "Cultiar.AUS_OTH.SV.Fst.windowed.weir.fst"
 
 fst_data <- read_tsv(file_name, col_names = TRUE)
-
+fst_data<-fst_data %>% mutate(MEAN_FST=ifelse(MEAN_FST<0,0,MEAN_FST))
 # Filter data to include only chromosomes 1H to 7H
 fst_data_filtered <- fst_data %>%
     filter(CHROM %in% c("1H", "2H", "3H", "4H", "5H", "6H", "7H"))
