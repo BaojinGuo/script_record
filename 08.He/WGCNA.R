@@ -1,3 +1,8 @@
+conda install -c bioconda r-wgcna
+#library(reshape2)
+#library(stringr)
+#library(tidyverse)
+#library(magrittr) 
 library(WGCNA)
 options(stringsAsFactors = FALSE)
 enableWGCNAThreads()
