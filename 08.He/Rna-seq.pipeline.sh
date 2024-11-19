@@ -29,7 +29,7 @@ srun --export=all -n 1 -c 16 samtools sort -@ 16 -o '${line}'.sort.bam '${line}'
 
 ###Forth,featurecounts coount reads
 
-
+srun -A Pawsey0399 -c 64 -n 1 -p work featureCounts -T 64 -t mRNA -g Parent -p -a 0.Index/CS2.1_Ac.gff3 -o 5113_2305_CS2_Ac.counts *.sort.bam
 
 
 
@@ -41,7 +41,7 @@ srun --export=all -n 1 -c 16 samtools sort -@ 16 -o '${line}'.sort.bam '${line}'
 
 
 ####anyway,if you mainly focus on special genes, maybe needs unique reads
-ls *.sam|cut -f1 -d"."|while read line; do srun -A pawsey0399 -c 32 -n 1 -p work -t 2:00:00 grep "NH:i:1" $line.sam|grep "YT:Z:CP" > unique_reads/'${line}'.unique.sam  & done
+ls *.sam|cut -f1 -d"."|while read line; do srun -A pawsey0399 -c 32 -n 1 -p work -t 2:00:00 grep "NH:i:1" $line.sam|grep "YT:Z:CP" > unique_reads/$line.unique.sam  & done
 ls *.sam|cut -f1 -d"."|while read line; do srun -A pawsey0399 -c 32 -n 1 -p work -t 2:00:00 samtools view -H $line.sort.bam >unique_reads/$line.header; done 
 cat $line.header $line.unique.sam |samtools sort -@ 32 -o $line.unique.sort.bam
 
