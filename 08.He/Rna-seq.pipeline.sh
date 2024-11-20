@@ -29,7 +29,7 @@ srun --export=all -n 1 -c 16 samtools sort -@ 16 -o '${line}'.sort.bam '${line}'
 
 ###Forth,featurecounts coount reads
 
-srun -A Pawsey0399 -c 64 -n 1 -p work featureCounts -T 64 -t mRNA -g Parent -p -a 0.Index/CS2.1_Ac.gff3 -o 5113_2305_CS2_Ac.counts *.sort.bam
+srun -A Pawsey0399 -c 64 -n 1 -p work featureCounts -T 64 -t mRNA -g Parent -p -B -C -a 0.Index/CS2.1_Ac.gff3 -o 5113_2305_CS2_Ac.counts *.sort.bam
 
 
 
