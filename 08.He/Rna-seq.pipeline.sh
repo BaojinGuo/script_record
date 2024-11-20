@@ -31,24 +31,65 @@ srun --export=all -n 1 -c 16 samtools sort -@ 16 -o '${line}'.sort.bam '${line}'
 
 srun -A Pawsey0399 -c 64 -n 1 -p work featureCounts -T 64 -t mRNA -g Parent -p -B -C -a 0.Index/CS2.1_Ac.gff3 -o 5113_2305_CS2_Ac.counts *.sort.bam
 
-
-
-
-
-
-
-
-
-
 ####anyway,if you mainly focus on special genes, maybe needs unique reads
 ls *.sam|cut -f1 -d"."|while read line; do srun -A pawsey0399 -c 32 -n 1 -p work -t 2:00:00 grep "NH:i:1" $line.sam|grep "YT:Z:CP" > unique_reads/$line.unique.sam  & done
 ls *.sam|cut -f1 -d"."|while read line; do srun -A pawsey0399 -c 32 -n 1 -p work -t 2:00:00 samtools view -H $line.sort.bam >unique_reads/$line.header; done 
 cat $line.header $line.unique.sam |samtools sort -@ 32 -o $line.unique.sort.bam
 
 
+####DEG
+install.packages("pheatmap")
+if (!require("BiocManager", quietly = TRUE))
+     install.packages("BiocManager")
+BiocManager::install("DESeq2",force=T)
 
 
+library(DESeq2)
+library(pheatmap)
 
+col_data<-read.csv("GROUP.csv",row.names = 1)
+count_data<-read.csv("5113_2305_CS2_Ac.counts.csv",row.names = 1)
+
+dds <- DESeqDataSetFromMatrix(countData = count_data, colData = col_data, design = ~ Condition)
+rld <- rlog(dds)
+sample_dist_matrix <- dist(t(assay(rld)))
+sample_cluster <- hclust(sample_dist_matrix)
+pheatmap(as.matrix(sample_dist_matrix), clustering_method = "complete", main = "Sample Clustering")
+
+plotPCA(rld, intgroup = "Condition")
+
+results_list <- list()
+for (condition in unique(col_data$Condition)) {
+    # 提取当前条件的样本
+    condition_samples <- rownames(col_data[col_data$Condition == condition, ])
+    
+    # 提取当前条件的 count_data 和 col_data
+    count_data_condition <- count_data[, condition_samples]
+    col_data_condition <- col_data[condition_samples, ]
+    
+    # 确保 Group 是因子
+    col_data_condition$Group <- factor(col_data_condition$Group, levels = c("2305", "5113"))
+    
+    # 创建 DESeqDataSet 对象
+    dds_condition <- DESeqDataSetFromMatrix(countData = count_data_condition, colData = col_data_condition, design = ~ Group)
+    
+    # 运行 DESeq2 分析
+    dds_condition <- DESeq(dds_condition)
+    
+    # 提取 5113 vs 2305 的比较结果
+    res_condition <- results(dds_condition, contrast = c("Group", "5113", "2305"))
+    
+    # 将当前条件的结果存入列表
+    results_list[[condition]] <- res_condition
+    
+    # 将结果保存为 CSV 文件
+    output_filename <- paste0("DEG_results_", condition, ".csv")
+    write.csv(as.data.frame(res_condition), file = output_filename)
+    
+    # 输出结果概述
+    cat("Summary of Condition:", condition, "\n")
+    print(summary(res_condition))
+}
 
 
 
