@@ -1,3 +1,22 @@
+
+$FILE=your input file prefix
+plink --vcf /home/data/vcf/$FILE.vcf.gz --make-bed --out $FILE --allow-extra-chr
+# ADMIXTURE does not accept chromosome names that are not human chromosomes. We will thus just exchange the first column by 0
+awk '{$1="0";print $0}' $FILE.bim > $FILE.bim.tmp
+mv $FILE.bim.tmp $FILE.bim
+
+for i in {2..10}
+do
+ admixture --cv $FILE.bed $i > log${i}.out
+done
+
+awk '/CV/ {print $3,$4}' *out | cut -c 4,7-20 > $FILE.cv.error
+grep "CV" *out | awk '{print $3,$4}' | sed -e 's/(//;s/)//;s/://;s/K=//'  > $FILE.cv.error
+grep "CV" *out | awk '{print $3,$4}' | cut -c 4,7-20 > $FILE.cv.error
+
+
+
+
 ####for one K value
 library(ggplot2)
 library(reshape2)
