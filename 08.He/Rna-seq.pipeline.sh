@@ -341,6 +341,73 @@ for (gene in genes_of_interest) {
 }
 
 
+
+
+#########不使用merge的module，用分开的module
+moduleTraitCor = cor(MEs, datTraits, use = "p")
+moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples = nrow(datExpr0))
+
+# 绘制原始模块-性状相关性的热图
+pdf(file = "8_spike_fpkm1_Original_Module-trait_relationships.pdf", width = 8, height = 36)
+textMatrix = paste(signif(moduleTraitCor, 2), "\n(", signif(moduleTraitPvalue, 1), ")", sep = "")
+dim(textMatrix) = dim(moduleTraitCor)
+par(mar = c(6, 8.5, 3, 3))
+labeledHeatmap(
+  Matrix = moduleTraitCor,
+  xLabels = names(datTraits),
+  yLabels = names(MEs),
+  ySymbols = names(MEs),
+  colorLabels = FALSE,
+  colors = greenWhiteRed(50),
+  textMatrix = textMatrix,
+  cex.text = 0.4,
+  zlim = c(-1, 1),
+  main = "Original Module-Trait Relationships"
+)
+dev.off()
+
+
+# Step 1: 提取原始模块的基因表达数据
+modules = unique(dynamicColors) # 使用原始模块的颜色
+geneModules = data.frame(Gene = names(datExpr0), Module = dynamicColors) # 基因和模块对应表
+for (mod in modules) {
+  genesInModule = geneModules[geneModules$Module == mod, "Gene"]
+  expressionInModule = datExpr0[, genesInModule, drop = FALSE]
+  write.table(expressionInModule, file = paste0("Original_Module_", mod, "_expression.txt"),
+              row.names = TRUE, col.names = TRUE, quote = FALSE, sep = "\t")
+}
+write.table(geneModules, file = "Original_All_Module_Genes.txt", row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
+
+# Step 2: 提取原始模块的Hub基因
+moduleColors = dynamicColors  # 使用原始模块颜色
+
+# --- 选定目标模块 ---
+module = "lightgreen"  # 注意：这里直接使用原始模块名称
+moduleGenes = (moduleColors == module) # 筛选属于目标模块的基因
+
+# 计算 MM 和 GS（与目标模块和性状的相关性）
+MM = cor(datExpr0, MEs[, paste0("ME", module)], use = "p") # 使用原始模块特征值
+GS = cor(datExpr0, datTraits[, 1], use = "p") # 假设 datTraits 第 1 列是目标性状
+hubGeneData = data.frame(Gene = colnames(datExpr0), ModuleMembership = MM, GeneSignificance = GS)
+hubGenes = hubGeneData[abs(hubGeneData$ModuleMembership) > 0.8 & abs(hubGeneData$GeneSignificance) > 0.2, ]   # 设置筛选标准
+write.csv(hubGenes, paste0("Original_", module, "_hub_genes.csv"), row.names = FALSE)
+
+# Step 3: 网络文件的生成
+# 提取目标模块的基因和 TOM 矩阵
+moduleGenesList = colnames(datExpr0)[moduleGenes]
+moduleTOM = TOM[moduleGenes, moduleGenes]
+rownames(moduleTOM) = moduleGenesList
+colnames(moduleTOM) = moduleGenesList
+
+# 导出 Cytoscape 文件
+cyt = exportNetworkToCytoscape(moduleTOM,
+                               edgeFile = paste0("Original_", module, "_edges.txt"),
+                               nodeFile = paste0("Original_", module, "_nodes.txt"),
+                               weighted = TRUE, threshold = 0.1) # 根据需求调整 threshold
+
+
+
+
 pipeline:
 	1.	数据准备与过滤
 		数据读取 (WGCNA.fpkm = read.csv(...))： 导入RNA-Seq数据，以FPKM表达量作为分析的基础。
