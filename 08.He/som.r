@@ -85,3 +85,18 @@ geom_hline(yintercept = seq(0, 1, by = 0.2), color = "black", linetype = "dashed
 
 
 
+
+##################################################
+# 归一化每个神经元的数据，使其独立缩放
+normalize_per_neuron <- function(matrix) {
+    t(apply(matrix, 1, function(x) (x - min(x)) / (max(x) - min(x))))
+}
+
+# 归一化后存入 som_model$codes
+som_model$codes[[1]] <- normalize_per_neuron(som_model$codes[[1]])
+
+# 重新绘制 SOM codes 图
+plot(som_model, type = "codes", palette.name = custom_palette)
+
+
+
