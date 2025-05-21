@@ -1,4 +1,5 @@
-
+conda create -n gapit -c bioconda -c conda-forge -c hcc r-devtools r-lme4 r-base=4.4.1 r-ggplot2 r-dplyr r-data.table r-readr r-tibble r-tidyr
+devtools::install_github("jiabowang/GAPIT3", build_vignettes = FALSE)
 library(GAPIT)
 
 
