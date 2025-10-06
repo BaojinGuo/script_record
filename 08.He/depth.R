@@ -76,3 +76,6 @@ ggsave("depth_heatmap_zoom_445Mb_BWR_numbers.png", p_heatmap_zoom, width=12, hei
 # -----------------------------
 p_heatmap_all
 p_heatmap_zoom
+
+write.table(zoom_data, "zoom_445Mb_depth_data.tsv", 
+            sep="\t", quote=FALSE, row.names=FALSE)
