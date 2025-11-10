@@ -320,3 +320,170 @@ write.table(pvals, "pvalues_455.4_456Mb.tsv", sep = "\t", quote = FALSE, row.nam
 
 p_box
 
+###################################################################################################################
+####################################三组分组
+
+library(ggplot2)
+library(dplyr)
+library(stringr)
+
+# -----------------------------
+# 1. 读取所有 bed 文件
+# -----------------------------
+files <- list.files(pattern = "*.bed")
+
+all_data <- lapply(files, function(f) {
+    df <- read.table(f, header = FALSE, sep = "\t")
+    colnames(df) <- c("chr", "start", "end", "depth")
+    
+    # 样本名取文件名第一个点之前
+    sample_name <- str_split(basename(f), "\\.")[[1]][1]
+    df$sample <- sample_name
+    
+    # 去除异常值 (>3.5 * mean)
+    m <- mean(df$depth)
+    df <- df[df$depth <= 3.5 * m, ]
+    
+    # 归一化 (0–1)
+    df$depth_norm <- (df$depth - min(df$depth)) / (max(df$depth) - min(df$depth))
+    
+    # 区间中点作为位置
+    df$pos <- (df$start + df$end) / 2
+    df$pos_Mb <- df$pos / 1e6
+    
+    return(df)
+})
+
+# -----------------------------
+# 2. 合并所有样本
+# -----------------------------
+plot_data <- do.call(rbind, all_data)
+
+# -----------------------------
+# 3. 读取并整合 Hull 信息
+# -----------------------------
+trait_info <- read.table("Hull.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+
+# 保留存在于数据中的样本
+trait_info <- trait_info %>% filter(Sample %in% plot_data$sample)
+
+# 将数字编码转为分组名称
+# 假设 Hull 列为：2=Wild, 1=Hulless, 0=Hulled
+trait_info <- trait_info %>%
+    mutate(Hull = case_when(
+        Hull == 2 ~ "Wild",
+        Hull == 1 ~ "Hulless",
+        Hull == 0 ~ "Hulled"
+    ),
+    Hull = factor(Hull, levels = c("Wild", "Hulled", "Hulless")))  # Wild最上，Hulless最下
+
+# 合并 Hull 信息
+plot_data <- plot_data %>%
+    left_join(trait_info, by = c("sample" = "Sample"))
+
+if(!"Hull" %in% colnames(plot_data)) stop("❌ Hull column missing after join!")
+
+# -----------------------------
+# 4. 排序 & Y轴数值化
+# -----------------------------
+plot_data <- plot_data %>%
+    arrange(desc(Hull), sample) %>%
+    mutate(y_plot = as.numeric(factor(sample, levels = unique(sample))),
+           sample = factor(sample, levels = unique(sample)))
+
+# -----------------------------
+# 5. 计算分组边界和标签位置
+# -----------------------------
+group_boundaries <- plot_data %>%
+    group_by(Hull) %>%
+    summarise(ymin = min(y_plot, na.rm = TRUE),
+              ymax = max(y_plot, na.rm = TRUE)) %>%
+    arrange(desc(Hull)) %>%
+    mutate(y_label = (ymin + ymax) / 2)
+
+boundary_lines <- group_boundaries$ymax[-nrow(group_boundaries)] + 0.5
+
+# -----------------------------
+# 6. 全基因组热图
+# -----------------------------
+p_all <- ggplot(plot_data, aes(x = pos_Mb, y = sample, fill = depth_norm)) +
+    geom_tile() +
+    scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0.5) +
+    geom_hline(yintercept = boundary_lines, color = "black", size = 0.8) +
+    annotate(
+        "text",
+        x = min(plot_data$pos_Mb) - 20,
+        y = group_boundaries$y_label,
+        label = group_boundaries$Hull,
+        angle = 90,
+        vjust = 0.5,
+        size = 5
+    ) +
+    theme_bw() +
+    labs(
+        x = "Genomic position (Mb)",
+        y = "Sample",
+        fill = "Normalized depth (0–1)",
+        title = "Depth Heatmap (Chr4D)"
+    ) +
+    theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 8),
+        plot.margin = margin(10, 20, 10, 70),
+        panel.border = element_rect(colour = "black", fill = NA),
+        panel.spacing = unit(0, "lines")
+    ) +
+    coord_cartesian(ylim = c(min(plot_data$y_plot) - 0.5, max(plot_data$y_plot) + 0.5))  # 去除上下留白
+
+ggsave("depth_heatmap_grouped_full.pdf", p_all, width = 12, height = 56, dpi = 300,limitsize = FALSE)
+
+# -----------------------------
+# 7. Zoom in (455Mb+)
+# -----------------------------
+zoom_data <- plot_data %>% filter(pos >= 455000000)
+
+zoom_group_boundaries <- zoom_data %>%
+    group_by(Hull) %>%
+    summarise(ymin = min(y_plot, na.rm = TRUE),
+              ymax = max(y_plot, na.rm = TRUE)) %>%
+    arrange(desc(Hull)) %>%
+    mutate(y_label = (ymin + ymax) / 2)
+
+zoom_boundary_lines <- zoom_group_boundaries$ymax[-nrow(zoom_group_boundaries)] + 0.5
+
+p_zoom <- ggplot(zoom_data, aes(x = pos_Mb, y = sample, fill = depth_norm)) +
+    geom_tile() +
+    geom_text(aes(label = round(depth_norm, 2)), size = 2) +
+    scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0.5) +
+    geom_hline(yintercept = zoom_boundary_lines, color = "black", size = 0.8) +
+    annotate(
+        "text",
+        x = min(zoom_data$pos_Mb) - 0.1,
+        y = zoom_group_boundaries$y_label,
+        label = zoom_group_boundaries$Hull,
+        angle = 90,
+        vjust = 0.5,
+        size = 5
+    ) +
+    theme_bw() +
+    labs(
+        x = "Genomic position (Mb)",
+        y = "Sample",
+        fill = "Normalized depth (0–1)",
+        title = "Depth Heatmap (Chr4D:455Mb+)"
+    ) +
+    theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 8),
+        plot.margin = margin(10, 20, 10, 70),
+        panel.border = element_rect(colour = "black", fill = NA),
+        panel.spacing = unit(0, "lines")
+    ) +
+    coord_cartesian(ylim = c(min(zoom_data$y_plot) - 0.5, max(zoom_data$y_plot) + 0.5))  # 紧贴上下边界
+
+ggsave("depth_heatmap_grouped_zoom_455Mb.pdf", p_zoom, width = 12, height =56, dpi = 300,limitsize = FALSE)
+
+# -----------------------------
+# 8. 输出 zoom 数据
+# -----------------------------
+write.table(zoom_data, "zoom_455Mb_grouped_data.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
