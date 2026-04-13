@@ -83,5 +83,18 @@ srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singula
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/kmcv3.2.4.sif kmc -k31 -ci0 -b -t128 -m200 @Raw_data/'${id}'.list 02.KGWAS/01_kmc/noncanon/'${id}' 02.KGWAS/01_kmc/tmp/'${id}' '>$id.kmc.sh
 done <mapping.txt
 
+#############STEP2##############################
+cat mapping.txt |while read id; do echo '#!/bin/bash
+#SBATCH --job-name='${id}'_strand
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=200G
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+module load singularity/4.1.0-nompi
+source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate kgwas
+srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/kmers_add_strand_information -c 01_kmc/canon/'${id}' -n 01_kmc/noncanon/'${id}' -k 31 -o 02_kmers_strand/'${id}' '>$id.strand.sh; done
 
 
