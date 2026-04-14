@@ -37,8 +37,20 @@ module load bwa/0.7.17--h7132678_9
 srun --export=all -n 1 -c 128 bwa mem -t 128 -R "@RG\tID:'${line}'\tPL:illumina\tLB:library\tSM:'${line}'" /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/Ref/PY6.fa '${line}'_clean_1.fq.gz '${line}'_clean_2.fq.gz >/scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/01.SAM/'${line}'.PY6.sam 
 '>$line.bwa.sh; done
 
-
-
+#################STEP3###########################
+ls *sam|cut -f1 -d"."|while read line; do echo '#!/bin/bash
+#SBATCH --job-name='${line}'_sam
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=48
+#SBATCH --mem=180G
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+module load samtools/1.15--h3843a85_0
+mkdir /scratch/pawsey0399/bguo1/TMP/'${line}'
+srun --export=all -n 1 -c 48 samtools view -@ 16 -b '${line}'.PY6.sam |samtools sort -@ 32 -m 5G -T /scratch/pawsey0399/bguo1/TMP/'${line}' -o /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/02.BAM/'${line}'.PY6.sort.bam
+' >$line.sort.sh; done
 
 
 
