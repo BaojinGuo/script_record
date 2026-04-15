@@ -51,7 +51,82 @@ module load samtools/1.15--h3843a85_0
 mkdir /scratch/pawsey0399/bguo1/TMP/'${line}'
 srun --export=all -n 1 -c 48 samtools view -@ 16 -b '${line}'.PY6.sam |samtools sort -@ 32 -m 5G -T /scratch/pawsey0399/bguo1/TMP/'${line}' -o /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/02.BAM/'${line}'.PY6.sort.bam
 ' >$line.sort.sh; done
+samtools index -c $line
+#################STEP4###########################
+#!/bin/bash
 
+# 染色体表
+cat <<EOF > chr_map.txt
+1A GWHCBGG00000044
+2A GWHCBGG00000010
+3A GWHCBGG00000054
+4A GWHCBGG00000007
+5A GWHCBGG00000075
+6A GWHCBGG00000048
+7A GWHCBGG00000030
+1C GWHCBGG00000087
+2C GWHCBGG00000033
+3C GWHCBGG00000072
+4C GWHCBGG00000029
+5C GWHCBGG00000050
+6C GWHCBGG00000086
+7C GWHCBGG00000011
+1D GWHCBGG00000078
+2D GWHCBGG00000035
+3D GWHCBGG00000067
+4D GWHCBGG00000039
+5D GWHCBGG00000043
+6D GWHCBGG00000080
+7D GWHCBGG00000004
+EOF
+
+# 样本循环
+for bam in *.bam
+do
+    sample=$(basename "$bam" .PY6.sort.bam)
+
+    for group in A C D
+    do
+        script=${sample}.${group}.sh
+
+        # 写头
+        cat <<EOF > "$script"
+#!/bin/bash
+#SBATCH --job-name=${sample}_${group}_Deep
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=64
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+
+module load singularity/4.1.0-nompi
+
+EOF
+
+        while read chr region
+        do
+            if [[ $chr == *${group} ]]; then
+                cat <<EOF >> "$script"
+echo "Running ${sample} ${chr} ..."
+
+srun --export=all -n 1 -c 64 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/deepvariant.sif run_deepvariant \\
+--model_type WGS \\
+--ref /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/Ref/PY6.fa \\
+--regions ${region} \\
+--reads /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/02.BAM/${sample}.PY6.sort.bam \\
+--sample_name ${sample} \\
+--output_gvcf /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/03.Deep/${sample}.${chr}.deep.g.vcf.gz \\
+--output_vcf /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/03.Deep/${sample}.${chr}.deep.vcf.gz \\
+--num_shards 64
+
+EOF
+            fi
+        done < chr_map.txt   
+
+        chmod +x "$script"
+    done
+done
 
 
 
