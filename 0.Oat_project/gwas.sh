@@ -1,4 +1,5 @@
 grep -Ei -l "error|fail|exception" slurm-*
+comm -23 <(sort ../../mapping.txt ) <(ls *7A*.g.vcf.gz |sed 's#.*/##' | cut -d'.' -f1 | sort -u) >../7Adeep.missing
 
 tree -d
 .
