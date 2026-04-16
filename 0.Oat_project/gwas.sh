@@ -131,7 +131,55 @@ EOF
     done
 done
 
+############################STEP4-2################################
+# 先准备 chr_map
+declare -A chr_map
+while read chr region
+do
+    chr_map[$chr]=$region
+done < chr_map.txt
 
+
+# 遍历所有 missing 文件
+for file in *.deep.missing
+do
+    chr=$(basename $file .deep.missing)   # 例如 3C
+
+    while read sample
+    do
+        script=${sample}.${chr}.rerun.sh
+
+        cat <<EOF > "$script"
+#!/bin/bash
+#SBATCH --job-name=${sample}_${chr}_Deep
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=64
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+
+module load singularity/4.1.0-nompi
+
+echo "Re-running ${sample} ${chr} ..."
+
+srun --export=all -n 1 -c 64 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/deepvariant.sif run_deepvariant \\
+--model_type WGS \\
+--ref /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/Ref/PY6.fa \\
+--regions ${chr_map[$chr]} \\
+--reads /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/02.BAM/${sample}.PY6.sort.bam \\
+--sample_name ${sample} \\
+--output_gvcf /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/03.Deep/${sample}.${chr}.deep.g.vcf.gz \\
+--output_vcf /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/03.Deep/${sample}.${chr}.deep.vcf.gz \\
+--num_shards 64
+
+EOF
+
+        chmod +x "$script"
+
+    done < $file
+
+done
 
 
 
