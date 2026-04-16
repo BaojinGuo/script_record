@@ -1,3 +1,5 @@
+grep -Ei -l "error|fail|exception" slurm-*
+
 tree -d
 .
 ├── 01.GWAS
