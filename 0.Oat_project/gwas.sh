@@ -235,4 +235,29 @@ module load singularity/4.1.0-nompi
 source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate kgwas
 srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/kmers_add_strand_information -c 01_kmc/canon/'${id}' -n 01_kmc/noncanon/'${id}' -k 31 -o 02_kmers_strand/'${id}' '>$id.strand.sh; done
 
+###############STEP3###########################
+
+#!/bin/bash
+#SBATCH --job-name=kgws-03
+#SBATCH --partition=highmem
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=800G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=96:00:00
+#SBATCH --account=pawsey0399
+module load singularity/4.1.0-nompi
+source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate kgwas
+srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/list_kmers_found_in_multiple_samples -l /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/02.KGWAS/03_kmers_list/kmers_list_paths.txt -k 31 --mac 50 -p 0.1 -o /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/02.KGWAS/04_kmers_filter/kmers_to_use
+
+
+
+
+
+
+
+
+
+
+
 
