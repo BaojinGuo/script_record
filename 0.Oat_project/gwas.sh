@@ -181,7 +181,21 @@ EOF
 
 done
 
-
+#######################STEP5##################
+or i in {1..7}{A,C,D}; do echo '#!/bin/bash        
+#SBATCH --job-name='${i}'_gln
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=64
+#SBATCH --mem=200G
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+#SBATCH --export=NONE
+module load bcftools/1.15--haf5b3da_0
+module load singularity/4.1.0-nompi                                                                                                                                         cd /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/04.GLnexus/'${i}'
+srun --export=all -n 1 -c 64 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/Glnexus.sif glnexus_cli --config DeepVariant --bed '${i}' --threads 64 /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/03.Deep/*'${i}'*.g.vcf.gz |bcftools view --threads 64 - |bgzip -@ 64 -c > Oat_hull_PY.'${i}'.cohort.vcf.gz
+' >$i.glnexus.sh; done
 
 
 
