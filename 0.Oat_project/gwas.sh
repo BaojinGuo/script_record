@@ -182,7 +182,7 @@ EOF
 done
 
 #######################STEP5##################
-or i in {1..7}{A,C,D}; do echo '#!/bin/bash        
+for i in {1..7}{A,C,D}; do echo '#!/bin/bash        
 #SBATCH --job-name='${i}'_gln
 #SBATCH --partition=work
 #SBATCH --nodes=1
