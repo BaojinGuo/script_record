@@ -184,17 +184,17 @@ done
 #######################STEP5##################
 for i in {1..7}{A,C,D}; do echo '#!/bin/bash        
 #SBATCH --job-name='${i}'_gln
-#SBATCH --partition=work
+#SBATCH --partition=highmem
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=64
-#SBATCH --mem=200G
-#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=128
+#SBATCH --time=96:00:00
 #SBATCH --account=pawsey0399
 #SBATCH --export=NONE
 module load bcftools/1.15--haf5b3da_0
-module load singularity/4.1.0-nompi                                                                                                                                         cd /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/04.GLnexus/'${i}'
-srun --export=all -n 1 -c 64 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/Glnexus.sif glnexus_cli --config DeepVariant --bed '${i}' --threads 64 /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/03.Deep/*'${i}'*.g.vcf.gz |bcftools view --threads 64 - |bgzip -@ 64 -c > Oat_hull_PY.'${i}'.cohort.vcf.gz
+module load singularity/4.1.0-nompi                                                                                                                                         
+
+srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/Glnexus.sif glnexus_cli --config DeepVariant --bed '${i}' --threads 128 /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/03.Deep/*'${i}'*.g.vcf.gz |bcftools view --threads 128 - |bgzip -@ 128 -c > Oat_hull_PY.'${i}'.cohort.vcf.gz
 ' >$i.glnexus.sh; done
 
 
@@ -263,6 +263,61 @@ srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/kmers_
 module load singularity/4.1.0-nompi
 source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate kgwas
 srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/list_kmers_found_in_multiple_samples -l /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/02.KGWAS/03_kmers_list/kmers_list_paths.txt -k 31 --mac 50 -p 0.1 -o /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/02.KGWAS/04_kmers_filter/kmers_to_use
+
+
+
+
+
+
+
+
+
+
+
+####################run target region Kgwas########################
+###################STEP1##########################################
+for f in SRR*.sort.bam; do line=$(basename $f .sort.bam)
+cat <<EOF > ${line}.reads.sh
+#!/bin/bash
+#SBATCH --job-name=${line}
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+
+module load samtools/1.15--h3843a85_0
+srun --export=all -n 1 -c 8 samtools view -@ 8 -bh -f 4 ${line}.sort.bam > ../00.kmer-bam/${line}.unmapped.bam
+srun --export=all -n 1 -c 8 samtools view -h ${line}.sort.bam | awk 'BEGIN{OFS="\t"} /^@/ || $6 ~ /S|H/' | samtools view -@ 8 -b - > ../00.kmer-bam/${line}.clipped.tmp.bam
+
+srun --export=all -n 1 -c 8 samtools view -@ 8 -bh -L region.bed -U ../00.kmer-bam/${line}.clipped.bam ../00.kmer-bam/${line}.clipped.tmp.bam
+rm ../00.kmer-bam/${line}.clipped.tmp.bam
+
+EOF
+ done
+
+ls CRR773*.sort.bam|cut -f1 -d"."|while read line; do samtools view -bh $line.PY6.sort.bam GWHCBGG00000039:400000000-456028319 >../00.kmer-bam/$line.candi-region.bam & done
+
+#############STEP2#########################################
+ls CRR*.clipped.bam|cut -f1 -d"."|while read line; do
+echo '#!/bin/bash        
+#SBATCH --job-name='${line}'-combine
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+module load samtools/1.15--h3843a85_0
+srun --export=all -n 1 -c 8 samtools merge -h -@ 8 -o ../00-1.kmer-combinebam/'${line}'.merge.bam '${line}'.candi-region.bam '${line}'.PY6.clipped.bam '${line}'.PY6.unmapped.bam' >$line.merge.sh
+done
+
+
+
+
+
+
 
 
 
