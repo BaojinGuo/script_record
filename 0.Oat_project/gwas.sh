@@ -300,6 +300,8 @@ EOF
 ls CRR773*.sort.bam|cut -f1 -d"."|while read line; do samtools view -bh $line.PY6.sort.bam GWHCBGG00000039:400000000-456028319 >../00.kmer-bam/$line.candi-region.bam & done
 
 #############STEP2#########################################
+######all the bam file should be sorted by name first, which means samtools sort -n####################
+
 ls CRR*.clipped.bam|cut -f1 -d"."|while read line; do
 echo '#!/bin/bash        
 #SBATCH --job-name='${line}'-combine
@@ -310,7 +312,7 @@ echo '#!/bin/bash
 #SBATCH --time=24:00:00
 #SBATCH --account=pawsey0399
 module load samtools/1.15--h3843a85_0
-srun --export=all -n 1 -c 8 samtools merge -h -@ 8 -o ../00-1.kmer-combinebam/'${line}'.merge.bam '${line}'.candi-region.bam '${line}'.PY6.clipped.bam '${line}'.PY6.unmapped.bam' >$line.merge.sh
+srun --export=all -n 1 -c 8 samtools merge -@ 8 -o ../00-1.kmer-combinebam/'${line}'.merge.bam '${line}'.candi-region.bam -h '${line}'.PY6.clipped.bam '${line}'.PY6.unmapped.bam' >$line.merge.sh
 done
 
 
