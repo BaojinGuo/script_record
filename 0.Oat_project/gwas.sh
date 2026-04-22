@@ -315,6 +315,27 @@ module load samtools/1.15--h3843a85_0
 srun --export=all -n 1 -c 8 samtools merge -@ 8 -o ../00-1.kmer-combinebam/'${line}'.merge.bam '${line}'.candi-region.bam -h '${line}'.PY6.clipped.bam '${line}'.PY6.unmapped.bam' >$line.merge.sh
 done
 
+#############STEP3###################################
+
+ls |cut -f1 -d"."|while read line; do echo '#!/bin/bash        
+#SBATCH --job-name='${line}'-fastq
+#SBATCH --partition=work
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --time=24:00:00
+#SBATCH --account=pawsey0399
+module load samtools/1.15--h3843a85_0
+srun --export=all -n 1 -c 8 samtools fastq -@ 8 -1 ../00-3.kmer-fastq/'${line}'_1.fq.gz -2 ../00-3.kmer-fastq/'${line}'_2.fq.gz -s ../00-3.kmer-fastq/'${line}'_s.fq.gz '${line}'.merge.bam' >$line.fastq.sh; done
+
+
+############STEP4####################################
+
+contindued kgwas STEP1
+
+
+
+
 
 
 
