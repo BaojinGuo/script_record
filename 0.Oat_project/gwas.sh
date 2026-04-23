@@ -250,6 +250,9 @@ source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate kgwas
 srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/kmers_add_strand_information -c 01_kmc/canon/'${id}' -n 01_kmc/noncanon/'${id}' -k 31 -o 02_kmers_strand/'${id}' '>$id.strand.sh; done
 
 ###############STEP3###########################
+ls $STRAND/* > $LIST/kmers_paths_raw.txt
+awk -F'/' '{print $0"\t"$NF}' $LIST/kmers_paths_raw.txt > $LIST/kmers_list_paths.txt
+
 
 #!/bin/bash
 #SBATCH --job-name=kgws-03
