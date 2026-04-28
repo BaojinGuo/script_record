@@ -287,8 +287,7 @@ srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/build_
 /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/04.target-kgwas> /scratch/pawsey0399/bguo1/software/kgwas/bin/emma_kinship_kmers -t 05_kmers_table/kmers_table-SRR -k 31 --maf 0.2 >06_kinship/kmers_table-SRR.kinship
 
 ######################STEP7####################################
-python2.7 /scratch/pawsey0399/bguo1/software/kgwas/kmers_gwas.py --pheno pheno_ssr.txt --kmers_table 05_kmers_table/kmers_table-SRR -p 128 -l 31 --maf 0.2 --outdir 07_kgwas/kmers-SRR-gwas_out
-
+python2.7 /scratch/pawsey0399/bguo1/software/kgwas2/kmers_gwas.py --pheno pheno_ssr.txt --kmers_table 05_kmers_table/kmers_table-SRR -p 128 -l 31 --maf 0.05 --outdir 07_kgwas/kmers-SRR-gwas_out --dont_remove_intermediates
 
 
 
