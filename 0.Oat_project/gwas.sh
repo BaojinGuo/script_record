@@ -283,7 +283,11 @@ source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate kgwas
 srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/build_kmers_table -l /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/04.target-kgwas/03_kmers_list/kmers_list_paths-CRR.txt -k 31 -a /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/04.target-kgwas/04_kmers_filter/kmers_to_use-CRR -o /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/04.target-kgwas/05_kmers_table/kmers_table-CRR
 
 
+############STEP6##############################################
+/scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/04.target-kgwas> /scratch/pawsey0399/bguo1/software/kgwas/bin/emma_kinship_kmers -t 05_kmers_table/kmers_table-SRR -k 31 --maf 0.2 >06_kinship/kmers_table-SRR.kinship
 
+######################STEP7####################################
+python2.7 /scratch/pawsey0399/bguo1/software/kgwas/kmers_gwas.py --pheno pheno_ssr.txt --kmers_table 05_kmers_table/kmers_table-SRR -p 128 -l 31 --maf 0.2 --outdir 07_kgwas/kmers-SRR-gwas_out
 
 
 
