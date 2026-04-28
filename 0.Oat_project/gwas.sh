@@ -267,6 +267,20 @@ module load singularity/4.1.0-nompi
 source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate kgwas
 srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/list_kmers_found_in_multiple_samples -l /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/02.KGWAS/03_kmers_list/kmers_list_paths.txt -k 31 --mac 50 -p 0.1 -o /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/02.KGWAS/04_kmers_filter/kmers_to_use
 
+################STEP4##################################
+
+#!/bin/bash
+#SBATCH --job-name=kgws-04
+#SBATCH --partition=highmem
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=800G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=96:00:00
+#SBATCH --account=pawsey0399
+module load singularity/4.1.0-nompi
+source /scratch/pawsey0399/bguo1/software/miniconda/bin/activate kgwas
+srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/build_kmers_table -l /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/04.target-kgwas/03_kmers_list/kmers_list_paths-CRR.txt -k 31 -a /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/04.target-kgwas/04_kmers_filter/kmers_to_use-CRR -o /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/04.target-kgwas/05_kmers_table/kmers_table-CRR
 
 
 
@@ -277,6 +291,18 @@ srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/list_k
 
 
 
+
+
+
+
+
+
+
+
+
+
+##################################################################
+###################################################################
 ####################run target region Kgwas########################
 ###################STEP1##########################################
 for f in SRR*.sort.bam; do line=$(basename $f .sort.bam)
