@@ -197,9 +197,12 @@ module load singularity/4.1.0-nompi
 srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singularity_image/Glnexus.sif glnexus_cli --config DeepVariant --bed '${i}' --threads 128 /scratch/pawsey0399/bguo1/Murdoch/11.Oat/Pinyan/01.GWAS/03.Deep/*'${i}'*.g.vcf.gz |bcftools view --threads 128 - |bgzip -@ 128 -c > Oat_hull_PY.'${i}'.cohort.vcf.gz
 ' >$i.glnexus.sh; done
 
+##################STEP6######################
 
-
-
+for i in {1..7}{A,C,D}
+> do
+> plink --vcf Oat_hull_PY.${i}.maf25.U80.recode.vcf.gz --make-bed --out ${i} --allow-extra-chr --vcf-half-call m --threads 128
+> done
 
 
 
