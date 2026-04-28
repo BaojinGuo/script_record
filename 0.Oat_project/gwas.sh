@@ -370,6 +370,158 @@ ggsave("QQ_3x7.pdf",
        width=20,
        height=10)
 
+###############################################################
+###############################################################
+###############################################################
+###############################################################
+###############################################################
+
+
+###############################################################
+###############################################################
+###############################################################
+###############################################################
+###############################################################
+#Split plot
+library(ggplot2)
+library(dplyr)
+
+# ===============================
+# 2. 参数
+# ===============================
+threshold <- 0.05 / 12708035
+log_threshold <- -log10(threshold)
+
+# 染色体顺序
+chr_order <- c(paste0(1:7,"A"),
+               paste0(1:7,"C"),
+               paste0(1:7,"D"))
+
+# ===============================
+# 3. 读取数据
+# ===============================
+gwas <- read.table("gwas_all.assoc.txt", header=TRUE)
+
+# ===============================
+# 4. 染色体转换（关键）
+# ===============================
+gwas$chr_label <- NA
+
+gwas$chr_label[gwas$chr %in% 1:7] <- paste0(gwas$chr[gwas$chr %in% 1:7], "A")
+gwas$chr_label[gwas$chr %in% 8:14] <- paste0(gwas$chr[gwas$chr %in% 8:14]-7, "C")
+gwas$chr_label[gwas$chr %in% 15:21] <- paste0(gwas$chr[gwas$chr %in% 15:21]-14, "D")
+
+# ===============================
+# 5. 清理数据（非常重要！！！）
+# ===============================
+gwas <- gwas %>%
+  filter(!is.na(p_wald)) %>%
+  filter(p_wald > 0) %>%      # 防止 log10(0)
+  filter(!is.na(ps))
+
+# 转换
+gwas$pos_mb <- gwas$ps / 1e6
+gwas$logp <- -log10(gwas$p_wald)
+gwas$significant <- gwas$p_wald < threshold
+
+# ===============================
+# 6. 分染色体作图
+# ===============================
+gwas$chr_label <- as.character(gwas$chr_label)
+
+for(chr in chr_order){
+
+  df <- gwas[gwas$chr_label == chr, ]
+
+  cat("Processing:", chr, "N =", nrow(df), "\n")
+
+  if(nrow(df) == 0){
+    cat("Skip:", chr, "\n")
+    next
+  }
+
+  # QQ
+  obs <- -log10(sort(df$p_wald))
+  exp <- -log10(ppoints(length(obs)))
+
+  qq <- data.frame(exp=exp, obs=obs)
+
+  p_qq <- ggplot(qq, aes(exp, obs)) +
+    geom_point(size=0.8) +
+    geom_abline(slope=1, intercept=0, color="red") +
+    theme_classic() +
+    labs(title=chr)
+
+  ggsave(paste0("QQ_", chr, ".pdf"), p_qq, width=4, height=4)
+
+  # Manhattan
+  p_man <- ggplot(df, aes(x=pos_mb, y=logp)) +
+    geom_point(color="grey70", size=0.5) +
+    geom_point(data=df[df$significant, ],
+               color="red", size=0.7) +
+    geom_hline(yintercept = log_threshold,
+               color="red", linetype="dashed") +
+    theme_classic() +
+    labs(title=chr)
+
+  ggsave(paste0("Manhattan_", chr, ".pdf"), p_man, width=8, height=6)
+}
+######################################################
+#####combined##########
+
+library(patchwork)
+makeQQ_noTitle <- function(df){
+
+  # 去掉异常值（防止空图）
+  df <- df[!is.na(df$p_wald) & df$p_wald > 0, ]
+
+  obs <- -log10(sort(df$p_wald))
+  exp <- -log10(ppoints(length(obs)))
+
+  qq <- data.frame(exp=exp, obs=obs)
+
+  ggplot(qq, aes(exp, obs)) +
+    geom_point(size=0.5) +
+    geom_abline(slope=1, intercept=0) +
+    theme_classic() +
+    theme(
+      plot.title = element_blank(),
+      axis.title = element_blank(),
+      axis.text = element_text(size=6)
+    )
+}
+
+# ===============================
+# 4. 生成21个QQ图
+# ===============================
+qq_list <- list()
+
+for(chr in chr_order){
+
+  df <- gwas[gwas$chr_label == chr, ]
+
+  cat("QQ:", chr, "N =", nrow(df), "\n")
+
+  if(nrow(df) == 0){
+    next
+  }
+
+  qq_list[[chr]] <- makeQQ_noTitle(df)
+}
+
+# ===============================
+# 5. 拼图（3×7）
+# ===============================
+qq_3x7 <- wrap_plots(qq_list, ncol=7)
+
+# 保存
+ggsave("QQ_3x7.pdf",
+       qq_3x7,
+       width=20,
+       height=10)
+#########################################
+
+
 
 
 
