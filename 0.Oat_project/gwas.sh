@@ -198,18 +198,177 @@ srun --export=all -n 1 -c 128 singularity exec /scratch/pawsey0399/bguo1/Singula
 ' >$i.glnexus.sh; done
 
 ##################STEP6######################
-
+for i in {1..7}{A,C,D}; do bcftools annotate --threads 6 --rename-chrs chr.rename -Oz -o ${i}.rename.vcf.gz Oat_hull_PY.${i}.maf25.U80.recode.vcf.gz & done
+############change chromosome name first###################
 for i in {1..7}{A,C,D}
 > do
 > plink --vcf Oat_hull_PY.${i}.maf25.U80.recode.vcf.gz --make-bed --out ${i} --allow-extra-chr --vcf-half-call m --threads 128
 > done
 
 
+###############STEP7######################
+########kinship file is from emma############
+for i in {1..7}{A,C,D}; do gemma -bfile ${i} -k ${i}.kinship.txt -lmm 4 -p pheno2.txt -o gwas_${i} & done
 
+################STEP8#########################
+# ===============================
+# 1. 加载包
+# ===============================
+library(ggplot2)
+library(dplyr)
+library(patchwork)
 
+# ===============================
+# 2. 参数
+# ===============================
+chr_order <- c(paste0(1:7,"A"),
+               paste0(1:7,"C"),
+               paste0(1:7,"D"))
 
+threshold <- 0.05 / 12708035
+log_threshold <- -log10(threshold)
 
+# ===============================
+# 3. 读取数据
+# ===============================
+gwas_list <- list()
 
+for(chr in chr_order){
+
+  file <- paste0("gwas_", chr, ".assoc.txt")
+
+  df <- read.table(file, header=TRUE)
+
+  df$chr_label <- chr
+  df$pos_mb <- df$ps / 1e6
+  df$logp <- -log10(df$p_score)
+
+  # 标记显著
+  df$significant <- df$p_score < threshold
+
+  gwas_list[[chr]] <- df
+}
+
+# ===============================
+# 4. QQ plot（单染色体）
+# ===============================
+makeQQ <- function(df){
+
+  obs <- -log10(sort(df$p_score))
+  exp <- -log10(ppoints(length(obs)))
+
+  qq <- data.frame(exp=exp, obs=obs)
+
+  ggplot(qq, aes(exp, obs)) +
+    geom_point(size=0.8) +
+    geom_abline(slope=1, intercept=0, color="red") +
+    theme_classic() +
+    labs(title=unique(df$chr_label),
+         x="Expected -log10(P)",
+         y="Observed -log10(P)")
+}
+
+# ===============================
+# 5. Manhattan（单染色体）
+# ===============================
+makeMan <- function(df){
+
+  ggplot(df, aes(x=pos_mb, y=logp)) +
+    geom_point(data=subset(df, significant==FALSE),
+               color="grey70", size=0.5) +
+    geom_point(data=subset(df, significant==TRUE),
+               color="red", size=0.7) +
+    geom_hline(yintercept = log_threshold,
+               color="red", linetype="dashed") +
+    theme_classic() +
+    labs(title=unique(df$chr_label),
+         x="Position (Mb)",
+         y="-log10(P)")
+}
+
+# ===============================
+# 6. 输出单染色体图（21个）
+# ===============================
+for(chr in chr_order){
+
+  df <- gwas_list[[chr]]
+
+  # QQ
+  p1 <- makeQQ(df)
+  ggsave(paste0("QQ_", chr, ".pdf"),
+         p1, width=4, height=4)
+
+  # Manhattan
+  p2 <- makeMan(df)
+  ggsave(paste0("Manhattan_", chr, ".pdf"),
+         p2, width=8, height=6)
+}
+
+# ===============================
+# 7. 无标题 Manhattan（用于拼图）
+# ===============================
+makeMan_noTitle <- function(df){
+
+  ggplot(df, aes(x=pos_mb, y=logp)) +
+    geom_point(data=subset(df, significant==FALSE),
+               color="grey70", size=0.5) +
+    geom_point(data=subset(df, significant==TRUE),
+               color="red", size=0.7) +
+    geom_hline(yintercept = log_threshold,
+               color="red", linetype="dashed") +
+    theme_classic() +
+    theme(
+      plot.title = element_blank(),
+      axis.title = element_blank()
+    )
+}
+
+# ===============================
+# 8. 3×7 Manhattan 拼图
+# ===============================
+man_list <- list()
+
+for(chr in chr_order){
+  man_list[[chr]] <- makeMan_noTitle(gwas_list[[chr]])
+}
+
+manhattan_3x7 <- wrap_plots(man_list, ncol=7)
+
+ggsave("Manhattan_3x7.pdf",
+       manhattan_3x7,
+       width=24,
+       height=21)
+
+# ===============================
+# 9. （可选）QQ 拼图
+# ===============================
+makeQQ_noTitle <- function(df){
+
+  obs <- -log10(sort(df$p_score))
+  exp <- -log10(ppoints(length(obs)))
+
+  qq <- data.frame(exp=exp, obs=obs)
+
+  ggplot(qq, aes(exp, obs)) +
+    geom_point(size=0.6) +
+    geom_abline(slope=1, intercept=0) +
+    theme_classic() +
+    theme(
+      plot.title = element_blank(),
+      axis.title = element_blank()
+    )
+}
+
+qq_list <- lapply(chr_order, function(chr){
+  makeQQ_noTitle(gwas_list[[chr]])
+})
+
+qq_3x7 <- wrap_plots(qq_list, ncol=7)
+
+ggsave("QQ_3x7.pdf",
+       qq_3x7,
+       width=20,
+       height=10)
 
 
 
