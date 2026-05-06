@@ -604,17 +604,18 @@ srun --export=all -n 1 -c 4  /scratch/pawsey0399/bguo1/software/kgwas/bin/build_
 python2.7 /scratch/pawsey0399/bguo1/software/kgwas2/kmers_gwas.py --pheno pheno_ssr.txt --kmers_table 05_kmers_table/kmers_table-SRR -p 128 -l 31 --maf 0.05 --outdir 07_kgwas/kmers-SRR-gwas_out --dont_remove_intermediates
 
 
+####################STEP8#####################################
+awk '{print$2}' phenotype_value.assoc.txt |sort|uniq |awk '{print ">"NR"\n"$1}' >sig_kmers.fa
 
+bowtie2 -x PY6.4D -f ../07_kgwas/kmers-CRR-gwas_out-2/kmers/output/sig_kmers.fa -k 10 --very-sensitive -p 128 -S sig_kmers.sam
 
+samtools sort -o -o sig_kmers.sort.bam sig_kmers.sam
+samtools index -c sig_kmers-all.sort.bam
 
+bedtools makewindows -g PY6.fa.fai -w 5000 > windows.5k.bed
+bedtools coverage -a windows.5k.bed -b sig_kmers.sort.bam >kmer_density.5k.txt
 
-
-
-
-
-
-
-
+ 
 
 
 
