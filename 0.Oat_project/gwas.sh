@@ -684,6 +684,241 @@ contindued kgwas STEP1
 
 
 
+###########################################################
+###########################################################
+###########################################################
+###########################################################
+###########################################################
+####################DEPTH##################################
+##################STEP1#####################################
+ls *.bam|cut -f1 -d"."|while read line; do samtools view -bh -o ../../../../03.Depth/$line.PY6.4D.sort.bam $line.PY6.sort.bam GWHCBGG00000039 & done
+
+
+
+################STEP2#####################################
+
+bedtools makewindows -g ../Ref/PY6.fa.fai -w 100000|grep GWHCBGG00000039 > 100Kb-windows/4D.100k.bed
+cat name.txt |while read line; do singularity exec /scratch/pawsey0399/bguo1/Singularity_image/mosdepth.sif mosdepth -t 4 -c GWHCBGG00000039 -Q 30 -b 4D.100k.bed ${line} ../${line}.PY6.4D.sort.bam& done
+
+################STEP3#####################################
+
+library(ggplot2)
+library(dplyr)
+library(stringr)
+
+files <- list.files(pattern = "*.bed.gz")
+all_data <- lapply(files, function(f) {
+    df <- read.table(f, header = FALSE, sep = "\t")
+    colnames(df) <- c("chr", "start", "end", "depth")
+    
+    # 样本名取文件名第一个点之前
+    sample_name <- str_split(basename(f), "\\.")[[1]][1]
+    df$sample <- sample_name
+    
+    # 去除异常值 (>5*mean)
+    m <- mean(df$depth)
+    df <- df[df$depth <= 5*m, ]
+    
+    # 归一化
+    df$depth_norm <- df$depth/m
+    
+    # 区间中点作为位置
+    df$pos <- (df$start + df$end)/2
+    df$pos_Mb <- df$pos / 1e6
+    
+    return(df)
+})
+plot_data <- do.call(rbind, all_data)
+trait_info <- read.table("trait.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+trait_info <- trait_info %>% filter(Accession %in% plot_data$sample)
+trait_info$Type<-factor(trait_info$Type,levels = c("Hulless","Hulled","Wild"))
+plot_data <- plot_data %>%
+    left_join(trait_info, by = c("sample" = "Accession")) %>%
+    arrange(desc(Type), sample)
+plot_data$sample <- factor(plot_data$sample, levels = unique(plot_data$sample))
+group_boundaries <- plot_data %>%
+    group_by(Type) %>%
+    summarise(y = max(as.numeric(factor(sample)))) %>%
+    arrange(desc(Type))
+group_boundaries <- group_boundaries %>%
+  mutate(y = cumsum(y))
+boundary_lines <- head(group_boundaries$y, -1)+0.5
+
+p_all <- ggplot(plot_data, aes(x = pos_Mb, y = sample, fill = depth_norm)) +
+    geom_tile() +
+    scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0.5) +
+    geom_hline(yintercept = boundary_lines, color = "black", size = 0.8) +
+    annotate(
+        "text",
+        x = min(plot_data$pos_Mb) - 20,
+        y = group_boundaries$y - diff(c(0, group_boundaries$y))/2,
+        label = group_boundaries$Type,
+        angle = 90, vjust = 0.5, size = 5
+    ) +
+    theme_bw() +
+    labs(
+        x = "Genomic position (Mb)",
+        y = "Accession",
+        fill = "Normalized Depth",
+        title = "Chr4D Depth Heatmap"
+    ) +
+    theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.margin = margin(10, 20, 10, 70)
+    )
+ggsave("depth_heatmap_grouped_full.pdf", p_all, width = 12, height = 102, dpi = 300,limitsize = F)
+
+
+zoom_data <- plot_data %>% filter(pos >= 455000000)
+zoom_group_boundaries <- zoom_data %>%
+    group_by(Type) %>%
+    summarise(y = max(as.numeric(factor(sample)))) %>%
+    arrange(desc(Type))
+zoom_group_boundaries <- zoom_group_boundaries %>%
+    mutate(y = cumsum(y))
+zoom_boundary_lines <- head(zoom_group_boundaries$y, -1)+0.5
+p_zoom <- ggplot(zoom_data, aes(x = pos_Mb, y = sample, fill = depth_norm)) +
+    geom_tile() +
+    geom_text(aes(label = round(depth_norm, 2)), size = 2) +  # 显示数字
+    scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0.5) +
+    geom_hline(yintercept = zoom_boundary_lines, color = "black", size = 0.8) +
+    annotate(
+        "text",
+        x = min(zoom_data$pos_Mb) - 0.1,
+        y = zoom_group_boundaries$y - diff(c(0, zoom_group_boundaries$y))/2,
+        label = zoom_group_boundaries$Type,
+        angle = 90, vjust = 0.5, size = 5
+    ) +
+    theme_bw() +
+    labs(
+        x = "Genomic position (Mb)",
+        y = "Accession",
+        fill = "Normalized Depth",
+        title = "Chr4D:455Mb+ Depth Heatmap "
+    ) +
+    theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.margin = margin(10, 20, 10, 70)
+    )
+ggsave("depth_heatmap_grouped_zoom_455Mb.pdf", p_zoom, width = 12, height = 102, dpi = 300,limitsize = F)
+
+write.table(zoom_data, "zoom_455Mb_grouped_data.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+
+##########################boxplot#########################################
+
+
+
+
+
+
+
+
+focus_data2 <- plot_data %>%    
+    filter(       
+        pos_Mb >= 455,        
+        pos_Mb <= 456,        
+        Type %in% c("Hulled", "Hulless")        
+    ) %>%    
+    mutate(        
+        bin = cut(            
+            pos_Mb,            
+            breaks = seq(455, 456.0001, by = 0.1),            
+            include.lowest = TRUE,            
+            right = FALSE            
+        )        
+    )
+
+stats_df <- focus_data2 %>%    
+    group_by(bin) %>%    
+    summarise(      
+        hulled_median =            
+            median(depth_norm[Type == "Hulled"], na.rm = TRUE),        
+        hulless_median =           
+            median(depth_norm[Type == "Hulless"], na.rm = TRUE),        
+        diff =           
+            hulless_median - hulled_median,      
+        fold =          
+            hulless_median / hulled_median,      
+        p =           
+           wilcox.test(depth_norm ~ Type)$p.value,        
+        .groups = "drop"        
+    ) %>%    
+    mutate(        
+        padj = p.adjust(p, method = "BH"),        
+        label = paste0(          
+            "Δ=",           
+            round(diff, 2),           
+            "\nFDR=",         
+            format(padj, scientific = TRUE, digits = 2)          
+        )      
+    )
+p_box <- ggplot(    
+    focus_data2,   
+    aes(x = bin, y = depth_norm, fill = Type)    
+) +    
+    geom_boxplot(      
+        outlier.shape = NA,       
+        alpha = 0.8,      
+        width = 0.6,      
+        position = position_dodge(width = 0.7)      
+    ) + 
+    geom_jitter(       
+        aes(color = Type),        
+        position = position_jitterdodge(          
+            jitter.width = 0.2,           
+            dodge.width = 0.7          
+        ),      
+        size = 0.8,      
+        alpha = 0.35     
+    ) + 
+    scale_fill_manual(    
+        values = c(        
+            "Hulless" = "#E64B35",        
+            "Hulled" = "#4DBBD5"       
+        )    
+    ) +    
+    scale_color_manual(      
+           values = c(          
+            "Hulless" = "#E64B35",         
+            "Hulled" = "#4DBBD5"        
+        )     
+    ) +
+    # 显示统计信息
+    geom_text(     
+        data = stats_df,    
+        inherit.aes = FALSE,   
+        aes(       
+            x = bin,      
+            y = 5,      
+            label = label     
+        ),  
+        size = 3,  
+        lineheight = 0.9    
+    ) +
+    theme_bw() + 
+    labs(        
+        x = "Genomic position (Mb, 100 kb bins)",        
+        y = "Normalized depth",        
+        fill = "Type",        
+        color = "Type",        
+        title = "Depth comparison in Chr4D:455–456 Mb"        
+    ) +    
+    coord_cartesian(ylim = c(0, 5)) +    
+    theme(        
+        axis.text.x = element_text(            
+            angle = 45,            
+            hjust = 1            
+        ),        
+        panel.grid.minor = element_blank(),        
+        plot.title = element_text(            
+            hjust = 0.5,            
+            face = "bold"            
+        )        
+    )
+
+
+
+
 
 
 
