@@ -682,6 +682,233 @@ contindued kgwas STEP1
 
 
 
+##################kgwas plot#############################
+library(data.table)
+library(ggplot2)
+py_map <- data.frame(
+  chr = c("1A","2A","3A","4A","5A","6A","7A",
+          "1C","2C","3C","4C","5C","6C","7C",
+          "1D","2D","3D","4D","5D","6D","7D"),
+  ref = c("GWHCBGG00000044","GWHCBGG00000010","GWHCBGG00000054","GWHCBGG00000007",
+          "GWHCBGG00000075","GWHCBGG00000048","GWHCBGG00000030",
+          "GWHCBGG00000087","GWHCBGG00000033","GWHCBGG00000072","GWHCBGG00000029",
+          "GWHCBGG00000050","GWHCBGG00000086","GWHCBGG00000011",
+          "GWHCBGG00000078","GWHCBGG00000035","GWHCBGG00000067","GWHCBGG00000039",
+          "GWHCBGG00000043","GWHCBGG00000080","GWHCBGG00000004"),
+  stringsAsFactors = FALSE
+)
+convert_chr <- function(df, ref_name) {
+  
+  # PY: scaffold → chr
+  if (ref_name == "PY") {
+    df$RNAME <- sapply(df$RNAME, function(x) {
+      hit <- py_map$chr[py_map$ref == x]
+      if (length(hit) == 0) return(NA)
+      return(hit)
+    })
+  }
+  
+  # SFS: chr4D → 4D
+  if (ref_name == "SFS") {
+    df$RNAME <- gsub("^chr", "", df$RNAME)
+  }
+  
+  return(df)
+}
+read_sam_safe <- function(f, ref_name) {
+  
+  sam <- fread(f, header = FALSE, fill = TRUE)
+  
+  # ⭐只保留SAM标准11列（去掉optional tags）
+  sam <- sam[, 1:11]
+  
+  setnames(sam, c(
+    "QNAME","FLAG","RNAME","POS","MAPQ","CIGAR",
+    "RNEXT","PNEXT","TLEN","SEQ","QUAL"
+  ))
+  
+  sam$POS <- as.numeric(sam$POS)
+  sam$REF <- ref_name
+  
+  sam <- convert_chr(sam, ref_name)
+  
+  return(sam)
+}
+files <- list.files(pattern = "sig_kmers-all-.*\\.sam$")
+
+all_data <- list()
+
+for (f in files) {
+  
+  ref <- sub("sig_kmers-all-(.*)\\.sam", "\\1", f)
+  cat("Reading:", ref, "\n")
+  
+  sam <- read_sam_safe(f, ref)
+  
+  all_data[[ref]] <- sam
+}
+
+df <- rbindlist(all_data)
+
+# 去掉无法映射染色体
+df <- df[!is.na(df$RNAME)]
+chr_keep <- c(
+  "1A","2A","3A","4A","5A","6A","7A",
+  "1C","2C","3C","4C","5C","6C","7C",
+  "1D","2D","3D","4D","5D","6D","7D"
+)
+
+df <- df[df$RNAME %in% chr_keep]
+df$group <- ifelse(
+  df$MAPQ == 0, "multi",
+  ifelse(df$MAPQ <= 30, "ambiguous",
+    ifelse(df$MAPQ == 255, "MAPQ255", "uniq")
+  )
+)
+bin_size <- 100000
+
+df$RNAME <- factor(df$RNAME, levels = chr_order)
+df$MB <- df$POS / 1e6
+df$BIN <- floor(df$POS / bin_size) * bin_size
+plot_df <- df[, .N, by = .(REF, RNAME, BIN, group)]
+plot_df$MB_BIN <- plot_df$BIN / 1e6
+chr_order <- c(
+  paste0(1:7, "A"),
+  paste0(1:7, "C"),
+  paste0(1:7, "D")
+)
+
+plot_df$RNAME <- factor(plot_df$RNAME, levels = chr_order)
+
+p1 <- ggplot(plot_df, aes(x = MB_BIN, y = N, color = group)) +
+    
+    geom_line(alpha = 0.8, linewidth = 0.4) +
+    
+    facet_grid(REF ~ RNAME, scales = "free_x") +
+    
+    theme_bw(base_size = 12) +
+    
+    labs(
+        title = "Genome-wide k-mer distribution across 4 references",
+        x = "Genomic position (Mb)",
+        y = "k-mer count"
+    ) +
+    
+    scale_color_manual(values = c(
+        "multi" = "black",
+        "ambiguous" = "grey60",
+        "uniq" = "blue",
+        "MAPQ255" = "red"
+    )) +
+    
+    theme(
+        strip.text = element_text(size = 7),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+    )
+
+ggsave("kgwas-4ref_21chr_Mb-order.pdf", p1, width = 18, height = 10, dpi = 300)
+###############only 4D zoom in 4 ref####################################
+get_4d_terminal_real <- function(df_ref) {
+    
+    d <- df_ref[df_ref$RNAME == "4D"]
+    
+    end_pos <- max(d$POS, na.rm = TRUE)
+    start_pos <- end_pos - 1e6
+    
+    sub <- d[d$POS >= start_pos & d$POS <= end_pos]
+    
+    return(sub)
+}
+df_list <- split(df, df$REF)
+
+df_4D_win <- rbindlist(lapply(df_list, get_4d_terminal_real))
+bin_size <- 50000
+
+df_4D_win$BIN <- floor(df_4D_win$POS / bin_size) * bin_size
+df_4D_win$MB_BIN <- df_4D_win$BIN / 1e6
+plot_zoom <- df_4D_win[, .N, by = .(REF, MB_BIN, group)]
+pB <- ggplot(plot_zoom, aes(x = MB_BIN, y = N, fill = group)) +
+    
+    geom_bar(stat = "identity", position = "stack") +
+    
+    facet_wrap(~REF, ncol = 2, scales = "free_x") +
+    
+    theme_bw(base_size = 12) +
+    
+    labs(
+        title = "Chr4D candidate region ",
+        x = "Genomic position (Mb)",
+        y = "k-mer count"
+    ) +
+    
+    scale_fill_manual(values = c(
+        "multi" = "black",
+        "ambiguous" = "grey60",
+        "uniq" = "blue",
+        "MAPQ255" = "red"
+    )) +
+    
+    theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.text = element_text(size = 10)
+    )
+
+ggsave("4D_terminal_realCoord_4ref.pdf", pB, width = 12, height = 8, dpi = 300)
+
+
+
+
+
+
+
+
+
+
+
+
+##############zoom in candidate region####################
+df_py <- df[df$REF == "PY"]
+target_chr <- "4D"
+start <- 455700000
+end   <- 456000000
+sub <- df_py[
+  df_py$RNAME == target_chr &
+  df_py$POS >= start &
+  df_py$POS <= end
+]
+bin_size <- 100000
+sub$BIN <- floor(sub$POS / bin_size) * bin_size
+sub$MB_BIN <- sub$BIN / 1e6
+plot_df2 <- sub[, .N, by = .(MB_BIN, group)]
+p2 <- ggplot(plot_df2, aes(x = MB_BIN, y = N, color = group)) +
+    
+    geom_line(linewidth = 0.8) +
+    
+    theme_bw(base_size = 12) +
+    
+    labs(
+        title = "PY chr4D: 450Mb to end",
+        x = "Genomic position (Mb)",
+        y = "k-mer count"
+    ) +
+    
+    scale_color_manual(values = c(
+        "multi" = "black",
+        "ambiguous" = "grey60",
+        "uniq" = "blue",
+        "MAPQ255" = "red"
+    ))
+
+ggsave("PY_4D_450-460_zoom.pdf", p2, width = 10, height = 5, dpi = 300)
+
+
+
+
+
+
+
+
+
 
 
 ###########################################################
